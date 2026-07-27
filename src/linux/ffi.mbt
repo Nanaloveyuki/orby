@@ -62,9 +62,17 @@ extern "C" fn native_exit(code : Int) -> Unit = "orby_gtk_exit"
 #owned(callback)
 extern "C" fn native_set_event_callback(
   call_closure : FuncRef[
-    ((Int, Int, Int, Int, Double) -> Unit, Int, Int, Int, Int, Double) -> Unit,
+    (
+      (Int, Int, Int, Int, Double, Double) -> Unit,
+      Int,
+      Int,
+      Int,
+      Int,
+      Double,
+      Double,
+    ) -> Unit,
   ],
-  callback : (Int, Int, Int, Int, Double) -> Unit,
+  callback : (Int, Int, Int, Int, Double, Double) -> Unit,
 ) -> Unit = "orby_gtk_set_event_callback"
 
 ///|
