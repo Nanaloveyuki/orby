@@ -26,6 +26,22 @@ test "logical size converts through a scale factor" {
 }
 
 ///|
+test "scale conversion rejects invalid factors" {
+  try LogicalSize::new(width=320.0, height=240.0).to_physical(0.0) catch {
+    GeometryError::InvalidScaleFactor(scale_factor) =>
+      assert_true(scale_factor == 0.0)
+  } noraise {
+    _ => fail("expected an invalid scale-factor error")
+  }
+  try Size::new(width=400, height=300).to_logical(-1.0) catch {
+    GeometryError::InvalidScaleFactor(scale_factor) =>
+      assert_true(scale_factor == -1.0)
+  } noraise {
+    _ => fail("expected an invalid scale-factor error")
+  }
+}
+
+///|
 test "physical positions preserve negative desktop coordinates" {
   debug_inspect(Position::new(x=-120, y=48), content="{ x: -120, y: 48 }")
 }

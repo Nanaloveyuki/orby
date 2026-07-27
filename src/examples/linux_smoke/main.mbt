@@ -97,8 +97,8 @@ pub impl @linux.App for Smoke with fn about_to_wait(self, app) {
 }
 
 ///|
-fn main {
-  let event_loop = try! @linux.EventLoop::new()
+fn main raise {
+  let event_loop = @linux.EventLoop::new()
   let monitors = event_loop.available_monitors()
   for monitor in monitors {
     match event_loop.monitor(monitor.id) {

@@ -109,9 +109,9 @@ pub impl @windows.App for Smoke with fn about_to_wait(self, app) {
 }
 
 ///|
-fn main {
+fn main raise {
   println("orby windows smoke: initializing")
-  let event_loop = try! @windows.EventLoop::new()
+  let event_loop = @windows.EventLoop::new()
   let monitors = event_loop.available_monitors()
   if monitors.length() < 1 {
     abort("Orby Win32 smoke expected at least one monitor")

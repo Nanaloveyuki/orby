@@ -132,13 +132,13 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
 }
 
 ///|
-fn main {
+fn main raise {
   match @moonview.register_custom_scheme("orby") {
     Ok(_) => ()
     Err(_error) => abort("orby moonview linux: scheme registration failed")
   }
   let app = { window: None, view: None, passed: false }
-  let event_loop = try! @linux.EventLoop::new()
+  let event_loop = @linux.EventLoop::new()
   let code = event_loop.run_app(app)
   if code != 0 || !app.passed {
     abort("orby moonview linux: smoke failed")
