@@ -1,2 +1,6 @@
 # ref
 ref/
+
+# MoonBit build products and downloaded package sources
+_build/
+.mooncakes/

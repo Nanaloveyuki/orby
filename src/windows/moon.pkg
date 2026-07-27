@@ -1,0 +1,11 @@
+import {
+  "moonbitlang/core/encoding/utf8",
+  "Nanaloveyuki/orby/core",
+}
+
+supported_targets = "native"
+
+options(
+  "native-stub": [ "native_window.c" ],
+  targets: { "ffi.mbt": [ "native" ] },
+)

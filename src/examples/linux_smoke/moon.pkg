@@ -1,0 +1,8 @@
+import {
+  "Nanaloveyuki/orby/core",
+  "Nanaloveyuki/orby/linux",
+}
+
+supported_targets = "native"
+
+pkgtype(kind: "executable")
