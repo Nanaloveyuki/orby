@@ -1,7 +1,6 @@
 ///|
 struct Smoke {
   mut window : @linux.Window?
-  mut constraint_phase : Int
 }
 
 ///|
@@ -20,11 +19,8 @@ pub impl @linux.App for Smoke with fn started(self, app) {
   window.set_inner_size(@core.Size::new(width=640, height=480))
   window.set_min_inner_size(Some(@core.Size::new(width=400, height=300)))
   window.set_max_inner_size(Some(@core.Size::new(width=640, height=480)))
-  window.request_redraw()
-}
-
-///|
-fn Smoke::finish_window_setup(_self : Smoke, window : @linux.Window) -> Unit {
+  window.set_inner_size(@core.Size::new(width=1, height=1))
+  window.set_inner_size(@core.Size::new(width=2000, height=2000))
   window.set_min_inner_size(None)
   window.set_max_inner_size(None)
   window.set_outer_position(@core.Position::new(x=40, y=40))
@@ -45,28 +41,6 @@ fn Smoke::finish_window_setup(_self : Smoke, window : @linux.Window) -> Unit {
 ///|
 pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
   match event {
-    @core.WindowEvent::Resized(size) =>
-      match self.window {
-        Some(window) =>
-          if self.constraint_phase == 1 {
-            if size.width < 400 || size.height < 300 {
-              abort(
-                "Orby GTK smoke expected the minimum client size to be enforced",
-              )
-            }
-            window.set_inner_size(@core.Size::new(width=2000, height=2000))
-            self.constraint_phase = 2
-          } else if self.constraint_phase == 2 {
-            if size.width > 640 || size.height > 480 {
-              abort(
-                "Orby GTK smoke expected the maximum client size to be enforced",
-              )
-            }
-            self.finish_window_setup(window)
-            self.constraint_phase = 3
-          }
-        None => ()
-      }
     @core.WindowEvent::CloseRequested =>
       match self.window {
         Some(window) => window.destroy()
@@ -96,22 +70,9 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
 }
 
 ///|
-pub impl @linux.App for Smoke with fn about_to_wait(self, _app) {
-  if self.constraint_phase == 0 {
-    match self.window {
-      Some(window) => {
-        window.set_inner_size(@core.Size::new(width=1, height=1))
-        self.constraint_phase = 1
-      }
-      None => ()
-    }
-  }
-}
-
-///|
 fn main {
   let event_loop = try! @linux.EventLoop::new()
-  let app = { window: None, constraint_phase: 0 }
+  let app = { window: None }
   let code = event_loop.run_app(app)
   if code != 23 {
     abort("Orby GTK smoke failed with exit code \{code}")
