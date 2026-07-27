@@ -46,6 +46,39 @@ static HMONITOR primary_monitor(void) {
   return MonitorFromPoint(origin, MONITOR_DEFAULTTOPRIMARY);
 }
 
+typedef struct {
+  int32_t wanted;
+  int32_t current;
+  HMONITOR monitor;
+} MonitorLookup;
+
+static BOOL CALLBACK monitor_lookup_proc(HMONITOR monitor, HDC dc, LPRECT rect, LPARAM data) {
+  (void)dc;
+  (void)rect;
+  MonitorLookup *lookup = (MonitorLookup *)data;
+  if (lookup->wanted == lookup->current) lookup->monitor = monitor;
+  lookup->current++;
+  return lookup->monitor == NULL;
+}
+static HMONITOR monitor_at_index(int32_t index) {
+  MonitorLookup lookup = { index, 0, NULL };
+  if (index < 0) return NULL;
+  EnumDisplayMonitors(NULL, NULL, monitor_lookup_proc, (LPARAM)&lookup);
+  return lookup.monitor;
+}
+static int32_t monitor_count(void) {
+  MonitorLookup lookup = { -1, 0, NULL };
+  EnumDisplayMonitors(NULL, NULL, monitor_lookup_proc, (LPARAM)&lookup);
+  return lookup.current;
+}
+static int32_t monitor_index(HMONITOR target) {
+  int32_t count = monitor_count();
+  for (int32_t index = 0; index < count; index++) {
+    if (monitor_at_index(index) == target) return index;
+  }
+  return -1;
+}
+
 static int32_t monitor_metric(HMONITOR monitor, int32_t metric) {
   MONITORINFO info = { sizeof(info) };
   if (monitor == NULL || !GetMonitorInfoW(monitor, &info)) return 0;
@@ -430,19 +463,14 @@ MOONBIT_FFI_EXPORT void orby_win_exit(int32_t code) {
   PostQuitMessage(code);
 }
 MOONBIT_FFI_EXPORT void orby_win_set_control_flow(int32_t poll) { poll_mode = poll != 0; }
-MOONBIT_FFI_EXPORT int32_t orby_win_has_primary_monitor(void) { return primary_monitor() != NULL; }
-MOONBIT_FFI_EXPORT int32_t orby_win_primary_monitor_metric(int32_t metric) { return monitor_metric(primary_monitor(), metric); }
-MOONBIT_FFI_EXPORT double orby_win_primary_monitor_scale(void) { return monitor_scale(primary_monitor()); }
-MOONBIT_FFI_EXPORT int32_t orby_win_has_current_monitor(uint64_t hwnd) {
-  return MonitorFromWindow((HWND)(uintptr_t)hwnd, MONITOR_DEFAULTTONULL) != NULL;
+MOONBIT_FFI_EXPORT int32_t orby_win_monitor_count(void) { return monitor_count(); }
+MOONBIT_FFI_EXPORT int32_t orby_win_monitor_metric(int32_t index, int32_t metric) {
+  return monitor_metric(monitor_at_index(index), metric);
 }
-MOONBIT_FFI_EXPORT int32_t orby_win_current_monitor_metric(uint64_t hwnd, int32_t metric) {
-  return monitor_metric(MonitorFromWindow((HWND)(uintptr_t)hwnd, MONITOR_DEFAULTTONULL), metric);
-}
-MOONBIT_FFI_EXPORT double orby_win_current_monitor_scale(uint64_t hwnd) {
-  HWND window = (HWND)(uintptr_t)hwnd;
-  UINT dpi = GetDpiForWindow(window);
-  return dpi == 0 ? monitor_scale(MonitorFromWindow(window, MONITOR_DEFAULTTONULL)) : (double)dpi / 96.0;
+MOONBIT_FFI_EXPORT double orby_win_monitor_scale(int32_t index) { return monitor_scale(monitor_at_index(index)); }
+MOONBIT_FFI_EXPORT int32_t orby_win_primary_monitor_index(void) { return monitor_index(primary_monitor()); }
+MOONBIT_FFI_EXPORT int32_t orby_win_current_monitor_index(uint64_t hwnd) {
+  return monitor_index(MonitorFromWindow((HWND)(uintptr_t)hwnd, MONITOR_DEFAULTTONULL));
 }
 MOONBIT_FFI_EXPORT void orby_win_set_event_callback(orby_event_callback callback, void *context) {
   if (event_context != NULL) moonbit_decref(event_context);
@@ -520,12 +548,11 @@ MOONBIT_FFI_EXPORT void orby_win_set_outer_position(uint64_t h, int32_t x, int32
 MOONBIT_FFI_EXPORT void orby_win_request_close(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_exit(int32_t c) { (void)c; }
 MOONBIT_FFI_EXPORT void orby_win_set_control_flow(int32_t p) { (void)p; }
-MOONBIT_FFI_EXPORT int32_t orby_win_has_primary_monitor(void) { return 0; }
-MOONBIT_FFI_EXPORT int32_t orby_win_primary_monitor_metric(int32_t m) { (void)m; return 0; }
-MOONBIT_FFI_EXPORT double orby_win_primary_monitor_scale(void) { return 1.0; }
-MOONBIT_FFI_EXPORT int32_t orby_win_has_current_monitor(uint64_t h) { (void)h; return 0; }
-MOONBIT_FFI_EXPORT int32_t orby_win_current_monitor_metric(uint64_t h, int32_t m) { (void)h; (void)m; return 0; }
-MOONBIT_FFI_EXPORT double orby_win_current_monitor_scale(uint64_t h) { (void)h; return 1.0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_monitor_count(void) { return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_monitor_metric(int32_t i, int32_t m) { (void)i; (void)m; return 0; }
+MOONBIT_FFI_EXPORT double orby_win_monitor_scale(int32_t i) { (void)i; return 1.0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_primary_monitor_index(void) { return -1; }
+MOONBIT_FFI_EXPORT int32_t orby_win_current_monitor_index(uint64_t h) { (void)h; return -1; }
 MOONBIT_FFI_EXPORT void orby_win_set_event_callback(void *c, void *p) { (void)c; (void)p; }
 MOONBIT_FFI_EXPORT int32_t orby_win_run(void) { return 1; }
 #endif

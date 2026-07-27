@@ -24,25 +24,58 @@ pub fn EventLoop::EventLoop() -> EventLoop {
 }
 
 ///|
-/// Returns the primary monitor when the native desktop exposes one.
-pub fn EventLoop::primary_monitor(_self : EventLoop) -> @core.Monitor? {
-  if !native_has_primary_monitor() {
+fn monitor_from_index(index : Int) -> @core.Monitor? {
+  if index < 0 || index >= native_monitor_count() {
     None
   } else {
-    Some(
-      @core.Monitor::new(
-        x=native_primary_monitor_metric(0),
-        y=native_primary_monitor_metric(1),
-        width=native_primary_monitor_metric(2),
-        height=native_primary_monitor_metric(3),
-        work_x=native_primary_monitor_metric(4),
-        work_y=native_primary_monitor_metric(5),
-        work_width=native_primary_monitor_metric(6),
-        work_height=native_primary_monitor_metric(7),
-        scale_factor=native_primary_monitor_scale(),
-      ),
-    )
+    match @core.MonitorId::from_index(index) {
+      Some(id) =>
+        Some(
+          @core.Monitor::new(
+            id~,
+            x=native_monitor_metric(index, 0),
+            y=native_monitor_metric(index, 1),
+            width=native_monitor_metric(index, 2),
+            height=native_monitor_metric(index, 3),
+            work_x=native_monitor_metric(index, 4),
+            work_y=native_monitor_metric(index, 5),
+            work_width=native_monitor_metric(index, 6),
+            work_height=native_monitor_metric(index, 7),
+            scale_factor=native_monitor_scale(index),
+          ),
+        )
+      None => None
+    }
   }
+}
+
+///|
+/// Returns every monitor available to the native desktop in index order.
+pub fn EventLoop::available_monitors(_self : EventLoop) -> Array[@core.Monitor] {
+  let monitors : Array[@core.Monitor] = []
+  let count = native_monitor_count()
+  for index in 0..<count {
+    match monitor_from_index(index) {
+      Some(monitor) => monitors.push(monitor)
+      None => ()
+    }
+  }
+  monitors
+}
+
+///|
+/// Resolves a monitor ID against the current native display configuration.
+pub fn EventLoop::monitor(
+  _self : EventLoop,
+  id : @core.MonitorId,
+) -> @core.Monitor? {
+  monitor_from_index(id.index())
+}
+
+///|
+/// Returns the primary monitor when the native desktop exposes one.
+pub fn EventLoop::primary_monitor(_self : EventLoop) -> @core.Monitor? {
+  monitor_from_index(native_primary_monitor_index())
 }
 
 ///|
