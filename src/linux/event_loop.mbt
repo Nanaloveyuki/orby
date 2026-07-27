@@ -60,6 +60,21 @@ pub fn ActiveApp::exit_with_code(_self : ActiveApp, code : Int) -> Unit {
 }
 
 ///|
+/// Controls how the UI thread proceeds after each native event batch. New
+/// event loops start in `Wait`; `Poll` intentionally does not sleep.
+pub fn ActiveApp::set_control_flow(
+  _self : ActiveApp,
+  control_flow : @core.ControlFlow,
+) -> Unit {
+  native_set_control_flow(
+    match control_flow {
+      Poll => true
+      Wait => false
+    },
+  )
+}
+
+///|
 pub fn[A : App] EventLoop::run_app(self : EventLoop, app : A) -> Int {
   let active = self.active()
   let callback = fn(
@@ -95,92 +110,100 @@ fn[A : App] dispatch_event(
   argd0 : Double,
   argd1 : Double,
 ) -> Unit {
-  let window_id = @core.WindowId::from_raw(id)
   match kind {
-    1 => app.window_event(active, window_id, CloseRequested)
-    2 => app.window_event(active, window_id, Destroyed)
-    3 =>
-      app.window_event(
-        active,
-        window_id,
-        Resized(@core.Size::new(width=arg0, height=arg1)),
-      )
-    4 => app.window_event(active, window_id, ScaleFactorChanged(argd0))
-    5 => app.window_event(active, window_id, FocusChanged(arg0 != 0))
-    6 => app.window_event(active, window_id, RedrawRequested)
-    7 =>
-      app.window_event(
-        active,
-        window_id,
-        KeyInput(
-          @core.NativeKeyEvent::new(
-            code=arg0,
-            state=if (arg1 & 16) != 0 { Pressed } else { Released },
-            repeat=(arg1 & 32) != 0,
-            modifiers=@core.Modifiers::new(
-              shift=(arg1 & 1) != 0,
-              control=(arg1 & 2) != 0,
-              alt=(arg1 & 4) != 0,
-              meta=(arg1 & 8) != 0,
+    14 => app.about_to_wait(active)
+    _ => {
+      let window_id = @core.WindowId::from_raw(id)
+      match kind {
+        1 => app.window_event(active, window_id, CloseRequested)
+        2 => app.window_event(active, window_id, Destroyed)
+        3 =>
+          app.window_event(
+            active,
+            window_id,
+            Resized(@core.Size::new(width=arg0, height=arg1)),
+          )
+        4 => app.window_event(active, window_id, ScaleFactorChanged(argd0))
+        5 => app.window_event(active, window_id, FocusChanged(arg0 != 0))
+        6 => app.window_event(active, window_id, RedrawRequested)
+        7 =>
+          app.window_event(
+            active,
+            window_id,
+            KeyInput(
+              @core.NativeKeyEvent::new(
+                code=arg0,
+                state=if (arg1 & 16) != 0 { Pressed } else { Released },
+                repeat=(arg1 & 32) != 0,
+                modifiers=@core.Modifiers::new(
+                  shift=(arg1 & 1) != 0,
+                  control=(arg1 & 2) != 0,
+                  alt=(arg1 & 4) != 0,
+                  meta=(arg1 & 8) != 0,
+                ),
+              ),
             ),
-          ),
-        ),
-      )
-    8 =>
-      match arg0.to_char() {
-        Some(character) =>
-          app.window_event(active, window_id, TextInput(character.to_string()))
-        None => ()
+          )
+        8 =>
+          match arg0.to_char() {
+            Some(character) =>
+              app.window_event(
+                active,
+                window_id,
+                TextInput(character.to_string()),
+              )
+            None => ()
+          }
+        9 =>
+          app.window_event(
+            active,
+            window_id,
+            PointerMoved(@core.Position::new(x=arg0, y=arg1)),
+          )
+        10 => app.window_event(active, window_id, PointerEntered)
+        11 => app.window_event(active, window_id, PointerLeft)
+        12 =>
+          app.window_event(
+            active,
+            window_id,
+            MouseInput(
+              match arg0 {
+                1 => @core.MouseButton::Left
+                2 => @core.MouseButton::Right
+                3 => @core.MouseButton::Middle
+                4 => @core.MouseButton::Back
+                5 => @core.MouseButton::Forward
+                _ => @core.MouseButton::Other(arg0)
+              },
+              if (arg1 & 16) != 0 {
+                Pressed
+              } else {
+                Released
+              },
+              @core.Modifiers::new(
+                shift=(arg1 & 1) != 0,
+                control=(arg1 & 2) != 0,
+                alt=(arg1 & 4) != 0,
+                meta=(arg1 & 8) != 0,
+              ),
+            ),
+          )
+        13 =>
+          app.window_event(
+            active,
+            window_id,
+            MouseWheel(
+              @core.ScrollDelta::new(x=argd0, y=argd1),
+              @core.Modifiers::new(
+                shift=(arg1 & 1) != 0,
+                control=(arg1 & 2) != 0,
+                alt=(arg1 & 4) != 0,
+                meta=(arg1 & 8) != 0,
+              ),
+            ),
+          )
+        _ => ()
       }
-    9 =>
-      app.window_event(
-        active,
-        window_id,
-        PointerMoved(@core.Position::new(x=arg0, y=arg1)),
-      )
-    10 => app.window_event(active, window_id, PointerEntered)
-    11 => app.window_event(active, window_id, PointerLeft)
-    12 =>
-      app.window_event(
-        active,
-        window_id,
-        MouseInput(
-          match arg0 {
-            1 => @core.MouseButton::Left
-            2 => @core.MouseButton::Right
-            3 => @core.MouseButton::Middle
-            4 => @core.MouseButton::Back
-            5 => @core.MouseButton::Forward
-            _ => @core.MouseButton::Other(arg0)
-          },
-          if (arg1 & 16) != 0 {
-            Pressed
-          } else {
-            Released
-          },
-          @core.Modifiers::new(
-            shift=(arg1 & 1) != 0,
-            control=(arg1 & 2) != 0,
-            alt=(arg1 & 4) != 0,
-            meta=(arg1 & 8) != 0,
-          ),
-        ),
-      )
-    13 =>
-      app.window_event(
-        active,
-        window_id,
-        MouseWheel(
-          @core.ScrollDelta::new(x=argd0, y=argd1),
-          @core.Modifiers::new(
-            shift=(arg1 & 1) != 0,
-            control=(arg1 & 2) != 0,
-            alt=(arg1 & 4) != 0,
-            meta=(arg1 & 8) != 0,
-          ),
-        ),
-      )
-    _ => ()
+    }
   }
-  app.about_to_wait(active)
 }

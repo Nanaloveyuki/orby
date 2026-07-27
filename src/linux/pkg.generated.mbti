@@ -17,6 +17,7 @@ pub struct ActiveApp {
 pub fn ActiveApp::create_window(Self, @core.WindowOptions) -> Window raise @core.WindowError
 pub fn ActiveApp::exit(Self) -> Unit
 pub fn ActiveApp::exit_with_code(Self, Int) -> Unit
+pub fn ActiveApp::set_control_flow(Self, @core.ControlFlow) -> Unit
 
 pub struct EventLoop {
   // private fields
