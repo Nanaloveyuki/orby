@@ -23,7 +23,16 @@ extern "C" fn native_set_title(host : UInt64, title : Bytes) -> Unit = "orby_gtk
 extern "C" fn native_request_redraw(host : UInt64) -> Unit = "orby_gtk_request_redraw"
 
 ///|
-extern "C" fn native_exit() -> Unit = "orby_gtk_exit"
+extern "C" fn native_set_visible(host : UInt64, visible : Bool) -> Unit = "orby_gtk_set_visible"
+
+///|
+extern "C" fn native_set_resizable(host : UInt64, resizable : Bool) -> Unit = "orby_gtk_set_resizable"
+
+///|
+extern "C" fn native_request_close(host : UInt64) -> Unit = "orby_gtk_request_close"
+
+///|
+extern "C" fn native_exit(code : Int) -> Unit = "orby_gtk_exit"
 
 ///|
 #borrow(call_closure)

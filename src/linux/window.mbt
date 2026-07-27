@@ -35,6 +35,23 @@ pub fn Window::set_title(self : Window, title : String) -> Unit {
 }
 
 ///|
+pub fn Window::set_visible(self : Window, visible : Bool) -> Unit {
+  native_set_visible(self.fixed, visible)
+}
+
+///|
+pub fn Window::set_resizable(self : Window, resizable : Bool) -> Unit {
+  native_set_resizable(self.fixed, resizable)
+}
+
+///|
+/// Requests application-controlled closure. Handle `CloseRequested` and call
+/// `destroy` to accept the request; otherwise it is cancelled.
+pub fn Window::request_close(self : Window) -> Unit {
+  native_request_close(self.fixed)
+}
+
+///|
 pub fn Window::request_redraw(self : Window) -> Unit {
   native_request_redraw(self.fixed)
 }

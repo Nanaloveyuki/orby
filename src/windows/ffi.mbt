@@ -23,7 +23,16 @@ extern "C" fn native_set_title(hwnd : UInt64, title : Bytes) -> Unit = "orby_win
 extern "C" fn native_request_redraw(hwnd : UInt64) -> Unit = "orby_win_request_redraw"
 
 ///|
-extern "C" fn native_exit() -> Unit = "orby_win_exit"
+extern "C" fn native_set_visible(hwnd : UInt64, visible : Bool) -> Unit = "orby_win_set_visible"
+
+///|
+extern "C" fn native_set_resizable(hwnd : UInt64, resizable : Bool) -> Unit = "orby_win_set_resizable"
+
+///|
+extern "C" fn native_request_close(hwnd : UInt64) -> Unit = "orby_win_request_close"
+
+///|
+extern "C" fn native_exit(code : Int) -> Unit = "orby_win_exit"
 
 ///|
 #borrow(call_closure)
