@@ -99,6 +99,16 @@ pub impl @linux.App for Smoke with fn about_to_wait(self, app) {
 ///|
 fn main {
   let event_loop = try! @linux.EventLoop::new()
+  let monitors = event_loop.available_monitors()
+  for monitor in monitors {
+    match event_loop.monitor(monitor.id) {
+      Some(resolved) =>
+        if resolved != monitor {
+          abort("Orby GTK smoke expected monitor IDs to resolve")
+        }
+      None => abort("Orby GTK smoke expected monitor IDs to resolve")
+    }
+  }
   match event_loop.primary_monitor() {
     Some(monitor) =>
       if monitor.width < 1 || monitor.height < 1 || monitor.scale_factor <= 0.0 {

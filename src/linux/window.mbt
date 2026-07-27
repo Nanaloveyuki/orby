@@ -43,23 +43,7 @@ pub fn Window::current_monitor(
   if !self.alive.val {
     raise @core.WindowError::Destroyed
   }
-  if !native_has_current_monitor(self.fixed) {
-    None
-  } else {
-    Some(
-      @core.Monitor::new(
-        x=native_current_monitor_metric(self.fixed, 0),
-        y=native_current_monitor_metric(self.fixed, 1),
-        width=native_current_monitor_metric(self.fixed, 2),
-        height=native_current_monitor_metric(self.fixed, 3),
-        work_x=native_current_monitor_metric(self.fixed, 4),
-        work_y=native_current_monitor_metric(self.fixed, 5),
-        work_width=native_current_monitor_metric(self.fixed, 6),
-        work_height=native_current_monitor_metric(self.fixed, 7),
-        scale_factor=native_current_monitor_scale(self.fixed),
-      ),
-    )
-  }
+  monitor_from_index(native_current_monitor_index(self.fixed))
 }
 
 ///|

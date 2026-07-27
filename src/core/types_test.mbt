@@ -32,7 +32,12 @@ test "physical positions preserve negative desktop coordinates" {
 
 ///|
 test "monitor normalizes unusable native metrics" {
+  let id = match MonitorId::from_index(0) {
+    Some(id) => id
+    None => fail("zero is a valid monitor index")
+  }
   let monitor = Monitor::new(
+    id~,
     x=-12,
     y=8,
     width=0,
@@ -45,6 +50,11 @@ test "monitor normalizes unusable native metrics" {
   )
   debug_inspect(
     monitor,
-    content="{\n  x: -12,\n  y: 8,\n  width: 1,\n  height: 1,\n  work_x: -12,\n  work_y: 8,\n  work_width: 1,\n  work_height: 1,\n  scale_factor: 1,\n}",
+    content="{\n  id: { index_: 0 },\n  x: -12,\n  y: 8,\n  width: 1,\n  height: 1,\n  work_x: -12,\n  work_y: 8,\n  work_width: 1,\n  work_height: 1,\n  scale_factor: 1,\n}",
   )
+}
+
+///|
+test "monitor IDs reject negative native indexes" {
+  debug_inspect(MonitorId::from_index(-1), content="None")
 }

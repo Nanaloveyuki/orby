@@ -93,10 +93,34 @@ pub fn Position::new(x~ : Int, y~ : Int) -> Position {
 }
 
 ///|
+/// A monitor identifier returned by a native display query. It remains valid
+/// only while the native display configuration has not changed.
+pub struct MonitorId {
+  priv index_ : Int
+} derive(Eq, Debug)
+
+///|
+/// Returns a monitor ID for a non-negative native display index.
+pub fn MonitorId::from_index(index : Int) -> MonitorId? {
+  if index < 0 {
+    None
+  } else {
+    Some({ index_: index })
+  }
+}
+
+///|
+/// Returns the native display index represented by this ID.
+pub fn MonitorId::index(self : MonitorId) -> Int {
+  self.index_
+}
+
+///|
 /// Monitor bounds in the native desktop coordinate system. These values are
 /// not interchangeable with physical client pixels on every backend; use
 /// `scale_factor` when converting for a specific platform.
 pub(all) struct Monitor {
+  id : MonitorId
   x : Int
   y : Int
   width : Int
@@ -110,6 +134,7 @@ pub(all) struct Monitor {
 
 ///|
 pub fn Monitor::new(
+  id~ : MonitorId,
   x~ : Int,
   y~ : Int,
   width~ : Int,
@@ -121,6 +146,7 @@ pub fn Monitor::new(
   scale_factor~ : Double,
 ) -> Monitor {
   {
+    id,
     x,
     y,
     width: if width < 1 {
