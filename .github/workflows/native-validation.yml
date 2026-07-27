@@ -1,0 +1,89 @@
+name: Native validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows native
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MoonBit
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+          irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Download WebView2 SDK
+        shell: powershell
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP "webview2-sdk.zip"
+          $destination = Join-Path $env:RUNNER_TEMP "webview2-sdk"
+          Invoke-WebRequest `
+            https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.4078.44 `
+            -OutFile $archive
+          Expand-Archive -Path $archive -DestinationPath $destination
+          "MOONVIEW_WEBVIEW2_SDK_DIR=$destination" | Out-File `
+            -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Update Mooncakes registry
+        shell: bash
+        run: moon update
+
+      - name: Check formatting
+        shell: powershell
+        run: moon fmt --check
+
+      - name: Check and test
+        shell: powershell
+        run: |
+          moon check --target native
+          moon test --target native
+
+      - name: Run Win32 smoke
+        shell: powershell
+        run: moon run src/examples/windows_smoke --target native
+
+  linux:
+    name: Linux native
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GTK3 development dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libgtk-3-dev libwebkit2gtk-4.1-dev pkg-config xvfb
+
+      - name: Install MoonBit
+        shell: bash
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Update Mooncakes registry
+        run: moon update
+
+      - name: Check formatting
+        run: moon fmt --check
+
+      - name: Check and test
+        run: |
+          moon check --target native
+          moon test --target native
+
+      - name: Run GTK3 smoke
+        run: xvfb-run --auto-servernum sh scripts/run-linux-smoke.sh
