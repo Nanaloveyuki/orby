@@ -38,12 +38,14 @@ pub fn Window::destroy(Self) -> Unit
 pub fn Window::id(Self) -> @core.WindowId
 pub fn Window::inner_size(Self) -> @core.Size raise @core.WindowError
 pub fn Window::is_destroyed(Self) -> Bool
+pub fn Window::is_fullscreen(Self) -> Bool raise @core.WindowError
 pub fn Window::is_maximized(Self) -> Bool raise @core.WindowError
 pub fn Window::is_minimized(Self) -> Bool raise @core.WindowError
 pub fn Window::request_close(Self) -> Unit
 pub fn Window::request_redraw(Self) -> Unit
 pub fn Window::scale_factor(Self) -> Double raise @core.WindowError
 pub fn Window::set_decorated(Self, Bool) -> Unit
+pub fn Window::set_fullscreen(Self, Bool) -> Unit
 pub fn Window::set_inner_size(Self, @core.Size) -> Unit
 pub fn Window::set_max_inner_size(Self, @core.Size?) -> Unit
 pub fn Window::set_maximized(Self, Bool) -> Unit

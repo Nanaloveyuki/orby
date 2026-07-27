@@ -41,6 +41,14 @@ pub impl @windows.App for Smoke with fn started(self, app) {
   }
   window.set_decorated(false)
   window.set_decorated(true)
+  window.set_fullscreen(true)
+  if !(try! window.is_fullscreen()) {
+    abort("Orby Win32 smoke expected managed fullscreen state")
+  }
+  window.set_fullscreen(false)
+  if (try! window.is_fullscreen()) {
+    abort("Orby Win32 smoke expected a restored window")
+  }
   window.set_visible(false)
   window.set_resizable(false)
   window.set_visible(true)

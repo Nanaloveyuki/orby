@@ -243,6 +243,18 @@ MOONBIT_FFI_EXPORT void orby_gtk_set_decorated(uint64_t host, int32_t decorated)
   GtkWidget *window = window_from_host(host);
   if (window != NULL) gtk_window_set_decorated(GTK_WINDOW(window), decorated != 0);
 }
+MOONBIT_FFI_EXPORT void orby_gtk_set_fullscreen(uint64_t host, int32_t fullscreen) {
+  GtkWidget *window = window_from_host(host);
+  if (window != NULL) {
+    if (fullscreen) gtk_window_fullscreen(GTK_WINDOW(window));
+    else gtk_window_unfullscreen(GTK_WINDOW(window));
+  }
+}
+MOONBIT_FFI_EXPORT int32_t orby_gtk_is_fullscreen(uint64_t host) {
+  GtkWidget *window = window_from_host(host);
+  GdkWindow *surface = window == NULL ? NULL : gtk_widget_get_window(window);
+  return surface != NULL && (gdk_window_get_state(surface) & GDK_WINDOW_STATE_FULLSCREEN) != 0;
+}
 MOONBIT_FFI_EXPORT void orby_gtk_set_min_inner_size(uint64_t host, int32_t width, int32_t height) {
   GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
   GtkWidget *window = window_from_host(host);
@@ -338,6 +350,8 @@ MOONBIT_FFI_EXPORT int32_t orby_gtk_is_minimized(uint64_t h) { (void)h; return 0
 MOONBIT_FFI_EXPORT void orby_gtk_set_maximized(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_is_maximized(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_decorated(uint64_t h, int32_t v) { (void)h; (void)v; }
+MOONBIT_FFI_EXPORT void orby_gtk_set_fullscreen(uint64_t h, int32_t v) { (void)h; (void)v; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_is_fullscreen(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_min_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_max_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }

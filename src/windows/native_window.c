@@ -24,6 +24,10 @@ typedef struct OrbySizeConstraints {
   int32_t min_height;
   int32_t max_width;
   int32_t max_height;
+  int fullscreen;
+  LONG_PTR saved_style;
+  LONG_PTR saved_ex_style;
+  RECT saved_rect;
   struct OrbySizeConstraints *next;
 } OrbySizeConstraints;
 
@@ -310,6 +314,37 @@ MOONBIT_FFI_EXPORT void orby_win_set_decorated(uint64_t hwnd, int32_t decorated)
   SetWindowLongPtrW(window, GWL_STYLE, style);
   SetWindowPos(window, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 }
+MOONBIT_FFI_EXPORT void orby_win_set_fullscreen(uint64_t hwnd, int32_t fullscreen) {
+  HWND window = (HWND)(uintptr_t)hwnd;
+  OrbySizeConstraints *state = constraints_for(window, fullscreen != 0);
+  if (state == NULL || (state->fullscreen != 0) == (fullscreen != 0)) return;
+  if (fullscreen) {
+    MONITORINFO monitor = { sizeof(monitor) };
+    HMONITOR target = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
+    if (target == NULL || !GetMonitorInfoW(target, &monitor)) return;
+    state->saved_style = GetWindowLongPtrW(window, GWL_STYLE);
+    state->saved_ex_style = GetWindowLongPtrW(window, GWL_EXSTYLE);
+    if (!GetWindowRect(window, &state->saved_rect)) return;
+    SetWindowLongPtrW(window, GWL_STYLE, state->saved_style & ~WS_OVERLAPPEDWINDOW);
+    SetWindowPos(window, HWND_TOP, monitor.rcMonitor.left, monitor.rcMonitor.top,
+        monitor.rcMonitor.right - monitor.rcMonitor.left,
+        monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+        SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    state->fullscreen = 1;
+  } else {
+    SetWindowLongPtrW(window, GWL_STYLE, state->saved_style);
+    SetWindowLongPtrW(window, GWL_EXSTYLE, state->saved_ex_style);
+    SetWindowPos(window, NULL, state->saved_rect.left, state->saved_rect.top,
+        state->saved_rect.right - state->saved_rect.left,
+        state->saved_rect.bottom - state->saved_rect.top,
+        SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    state->fullscreen = 0;
+  }
+}
+MOONBIT_FFI_EXPORT int32_t orby_win_is_fullscreen(uint64_t hwnd) {
+  OrbySizeConstraints *state = constraints_for((HWND)(uintptr_t)hwnd, 0);
+  return state != NULL && state->fullscreen != 0;
+}
 MOONBIT_FFI_EXPORT void orby_win_set_min_inner_size(uint64_t hwnd, int32_t width, int32_t height) {
   OrbySizeConstraints *constraints = constraints_for((HWND)(uintptr_t)hwnd, 1);
   if (constraints == NULL) return;
@@ -431,6 +466,8 @@ MOONBIT_FFI_EXPORT int32_t orby_win_is_minimized(uint64_t h) { (void)h; return 0
 MOONBIT_FFI_EXPORT void orby_win_set_maximized(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT int32_t orby_win_is_maximized(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT void orby_win_set_decorated(uint64_t h, int32_t v) { (void)h; (void)v; }
+MOONBIT_FFI_EXPORT void orby_win_set_fullscreen(uint64_t h, int32_t v) { (void)h; (void)v; }
+MOONBIT_FFI_EXPORT int32_t orby_win_is_fullscreen(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT void orby_win_set_min_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_win_set_max_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_win_set_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
