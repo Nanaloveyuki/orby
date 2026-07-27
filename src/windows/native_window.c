@@ -406,6 +406,24 @@ MOONBIT_FFI_EXPORT int32_t orby_win_is_fullscreen(uint64_t hwnd) {
   OrbySizeConstraints *state = constraints_for((HWND)(uintptr_t)hwnd, 0);
   return state != NULL && state->fullscreen != 0;
 }
+MOONBIT_FFI_EXPORT int32_t orby_win_set_fullscreen_on(uint64_t hwnd, int32_t index) {
+  HWND window = (HWND)(uintptr_t)hwnd;
+  OrbySizeConstraints *state = constraints_for(window, 1);
+  HMONITOR target = monitor_at_index(index);
+  MONITORINFO monitor = { sizeof(monitor) };
+  if (state == NULL || target == NULL || !GetMonitorInfoW(target, &monitor)) return 0;
+  if (state->fullscreen) return 1;
+  state->saved_style = GetWindowLongPtrW(window, GWL_STYLE);
+  state->saved_ex_style = GetWindowLongPtrW(window, GWL_EXSTYLE);
+  if (!GetWindowRect(window, &state->saved_rect)) return 0;
+  SetWindowLongPtrW(window, GWL_STYLE, state->saved_style & ~WS_OVERLAPPEDWINDOW);
+  if (!SetWindowPos(window, HWND_TOP, monitor.rcMonitor.left, monitor.rcMonitor.top,
+      monitor.rcMonitor.right - monitor.rcMonitor.left,
+      monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+      SWP_NOOWNERZORDER | SWP_FRAMECHANGED)) return 0;
+  state->fullscreen = 1;
+  return 1;
+}
 MOONBIT_FFI_EXPORT void orby_win_set_min_inner_size(uint64_t hwnd, int32_t width, int32_t height) {
   OrbySizeConstraints *constraints = constraints_for((HWND)(uintptr_t)hwnd, 1);
   if (constraints == NULL) return;
@@ -538,6 +556,7 @@ MOONBIT_FFI_EXPORT int32_t orby_win_is_maximized(uint64_t h) { (void)h; return 0
 MOONBIT_FFI_EXPORT void orby_win_set_decorated(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT void orby_win_set_fullscreen(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT int32_t orby_win_is_fullscreen(uint64_t h) { (void)h; return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_set_fullscreen_on(uint64_t h, int32_t i) { (void)h; (void)i; return 0; }
 MOONBIT_FFI_EXPORT void orby_win_set_min_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_win_set_max_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_win_set_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }

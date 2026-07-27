@@ -47,6 +47,9 @@ extern "C" fn native_set_decorated(host : UInt64, decorated : Bool) -> Unit = "o
 extern "C" fn native_set_fullscreen(host : UInt64, fullscreen : Bool) -> Unit = "orby_gtk_set_fullscreen"
 
 ///|
+extern "C" fn native_set_fullscreen_on(host : UInt64, monitor : Int) -> Bool = "orby_gtk_set_fullscreen_on"
+
+///|
 extern "C" fn native_is_fullscreen(host : UInt64) -> Bool = "orby_gtk_is_fullscreen"
 
 ///|

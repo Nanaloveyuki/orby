@@ -49,6 +49,7 @@ pub fn Window::request_redraw(Self) -> Unit
 pub fn Window::scale_factor(Self) -> Double raise @core.WindowError
 pub fn Window::set_decorated(Self, Bool) -> Unit
 pub fn Window::set_fullscreen(Self, Bool) -> Unit
+pub fn Window::set_fullscreen_on(Self, @core.MonitorId) -> Unit raise @core.WindowError
 pub fn Window::set_inner_size(Self, @core.Size) -> Unit
 pub fn Window::set_max_inner_size(Self, @core.Size?) -> Unit
 pub fn Window::set_maximized(Self, Bool) -> Unit

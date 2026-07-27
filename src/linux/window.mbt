@@ -135,6 +135,20 @@ pub fn Window::set_fullscreen(self : Window, fullscreen : Bool) -> Unit {
 }
 
 ///|
+/// Requests fullscreen on a current monitor snapshot. GTK applies this asynchronously.
+pub fn Window::set_fullscreen_on(
+  self : Window,
+  monitor : @core.MonitorId,
+) -> Unit raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  if !native_set_fullscreen_on(self.fixed, monitor.index()) {
+    raise @core.WindowError::MonitorUnavailable(monitor)
+  }
+}
+
+///|
 /// Returns the fullscreen state currently reported by GDK.
 pub fn Window::is_fullscreen(self : Window) -> Bool raise @core.WindowError {
   if !self.alive.val {
