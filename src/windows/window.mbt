@@ -1,10 +1,17 @@
 ///|
 pub struct WebViewHost {
   priv hwnd : UInt64
-} derive(Eq, Debug)
+  priv alive : Ref[Bool]
+} derive(Debug)
 
 ///|
-pub fn WebViewHost::native_handle(self : WebViewHost) -> UInt64 {
+/// Returns the HWND while its parent window remains alive.
+pub fn WebViewHost::native_handle(
+  self : WebViewHost,
+) -> UInt64 raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
   self.hwnd
 }
 
@@ -26,8 +33,14 @@ pub fn Window::id(self : Window) -> @core.WindowId {
 }
 
 ///|
-pub fn Window::webview_host(self : Window) -> WebViewHost {
-  { hwnd: self.hwnd }
+/// Returns a host for a WebView that must be destroyed before this window.
+pub fn Window::webview_host(
+  self : Window,
+) -> WebViewHost raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  { hwnd: self.hwnd, alive: self.alive }
 }
 
 ///|
