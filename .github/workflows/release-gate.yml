@@ -1,0 +1,21 @@
+name: Release gate
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Match tag and module version
+        shell: bash
+        run: |
+          set -eu
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' moon.mod)
+          test "v$version" = "$GITHUB_REF_NAME"
