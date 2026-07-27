@@ -14,6 +14,14 @@ static int initialized_com = 0;
 static int32_t window_count = 0;
 static int exit_requested = 0;
 
+static void client_to_outer_rect(DWORD style, DWORD ex_style, int32_t width, int32_t height, RECT *rect) {
+  rect->left = 0;
+  rect->top = 0;
+  rect->right = width > 0 ? width : 1;
+  rect->bottom = height > 0 ? height : 1;
+  AdjustWindowRectEx(rect, style, FALSE, ex_style);
+}
+
 static void emit_event(HWND hwnd, int32_t kind, int32_t arg0, int32_t arg1, double argd) {
   if (event_callback == NULL) return;
   const int32_t id = (int32_t)(intptr_t)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
@@ -80,8 +88,10 @@ MOONBIT_FFI_EXPORT uint64_t orby_win_create_window(
   MultiByteToWideChar(CP_UTF8, 0, (const char *)title, -1, wide, wide_len);
   DWORD style = WS_OVERLAPPEDWINDOW;
   if (!resizable) style &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+  RECT rect;
+  client_to_outer_rect(style, 0, width, height, &rect);
   HWND hwnd = CreateWindowExW(0, ORBY_CLASS, wide, style, CW_USEDEFAULT, CW_USEDEFAULT,
-      width, height, NULL, NULL, GetModuleHandleW(NULL), NULL);
+      rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, GetModuleHandleW(NULL), NULL);
   HeapFree(GetProcessHeap(), 0, wide);
   if (hwnd == NULL) return 0;
   SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)id);
@@ -112,6 +122,31 @@ MOONBIT_FFI_EXPORT void orby_win_set_resizable(uint64_t hwnd, int32_t resizable)
   SetWindowLongPtrW(window, GWL_STYLE, style);
   SetWindowPos(window, NULL, 0, 0, 0, 0,
       SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+}
+MOONBIT_FFI_EXPORT void orby_win_set_inner_size(uint64_t hwnd, int32_t width, int32_t height) {
+  HWND window = (HWND)(uintptr_t)hwnd;
+  RECT rect;
+  client_to_outer_rect(
+      (DWORD)GetWindowLongPtrW(window, GWL_STYLE),
+      (DWORD)GetWindowLongPtrW(window, GWL_EXSTYLE), width, height, &rect);
+  SetWindowPos(window, NULL, 0, 0, rect.right - rect.left, rect.bottom - rect.top,
+      SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+}
+MOONBIT_FFI_EXPORT int32_t orby_win_inner_width(uint64_t hwnd) {
+  RECT rect;
+  return GetClientRect((HWND)(uintptr_t)hwnd, &rect) ? rect.right - rect.left : 0;
+}
+MOONBIT_FFI_EXPORT int32_t orby_win_inner_height(uint64_t hwnd) {
+  RECT rect;
+  return GetClientRect((HWND)(uintptr_t)hwnd, &rect) ? rect.bottom - rect.top : 0;
+}
+MOONBIT_FFI_EXPORT double orby_win_scale_factor(uint64_t hwnd) {
+  UINT dpi = GetDpiForWindow((HWND)(uintptr_t)hwnd);
+  return dpi == 0 ? 1.0 : (double)dpi / 96.0;
+}
+MOONBIT_FFI_EXPORT void orby_win_set_outer_position(uint64_t hwnd, int32_t x, int32_t y) {
+  SetWindowPos((HWND)(uintptr_t)hwnd, NULL, x, y, 0, 0,
+      SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 MOONBIT_FFI_EXPORT void orby_win_request_close(uint64_t hwnd) {
   PostMessageW((HWND)(uintptr_t)hwnd, WM_CLOSE, 0, 0);
@@ -147,6 +182,11 @@ MOONBIT_FFI_EXPORT void orby_win_set_title(uint64_t h, moonbit_bytes_t t) { (voi
 MOONBIT_FFI_EXPORT void orby_win_request_redraw(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_set_visible(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT void orby_win_set_resizable(uint64_t h, int32_t r) { (void)h; (void)r; }
+MOONBIT_FFI_EXPORT void orby_win_set_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
+MOONBIT_FFI_EXPORT int32_t orby_win_inner_width(uint64_t h) { (void)h; return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_inner_height(uint64_t h) { (void)h; return 0; }
+MOONBIT_FFI_EXPORT double orby_win_scale_factor(uint64_t h) { (void)h; return 1.0; }
+MOONBIT_FFI_EXPORT void orby_win_set_outer_position(uint64_t h, int32_t x, int32_t y) { (void)h; (void)x; (void)y; }
 MOONBIT_FFI_EXPORT void orby_win_request_close(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_exit(int32_t c) { (void)c; }
 MOONBIT_FFI_EXPORT void orby_win_set_event_callback(void *c, void *p) { (void)c; (void)p; }

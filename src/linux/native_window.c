@@ -24,6 +24,11 @@ static void request_exit(int32_t code) {
   if (gtk_main_level() > 0) gtk_main_quit();
 }
 
+static GtkWidget *window_from_host(uint64_t host) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
+  return fixed == NULL ? NULL : GTK_WIDGET(g_object_get_data(G_OBJECT(fixed), "orby-window"));
+}
+
 static gboolean on_delete(GtkWidget *window, GdkEvent *, gpointer data) {
   (void)window;
   emit_event(GTK_WIDGET(data), 1, 0, 0, 0.0);
@@ -98,6 +103,26 @@ MOONBIT_FFI_EXPORT void orby_gtk_set_resizable(uint64_t host, int32_t resizable)
   GtkWidget *window = fixed == NULL ? NULL : GTK_WIDGET(g_object_get_data(G_OBJECT(fixed), "orby-window"));
   if (window != NULL) gtk_window_set_resizable(GTK_WINDOW(window), resizable != 0);
 }
+MOONBIT_FFI_EXPORT void orby_gtk_set_inner_size(uint64_t host, int32_t width, int32_t height) {
+  GtkWidget *window = window_from_host(host);
+  if (window != NULL) gtk_window_resize(GTK_WINDOW(window), width > 0 ? width : 1, height > 0 ? height : 1);
+}
+MOONBIT_FFI_EXPORT int32_t orby_gtk_inner_width(uint64_t host) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
+  return fixed == NULL ? 0 : gtk_widget_get_allocated_width(fixed);
+}
+MOONBIT_FFI_EXPORT int32_t orby_gtk_inner_height(uint64_t host) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
+  return fixed == NULL ? 0 : gtk_widget_get_allocated_height(fixed);
+}
+MOONBIT_FFI_EXPORT double orby_gtk_scale_factor(uint64_t host) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
+  return fixed == NULL ? 1.0 : (double)gtk_widget_get_scale_factor(fixed);
+}
+MOONBIT_FFI_EXPORT void orby_gtk_set_outer_position(uint64_t host, int32_t x, int32_t y) {
+  GtkWidget *window = window_from_host(host);
+  if (window != NULL) gtk_window_move(GTK_WINDOW(window), x, y);
+}
 MOONBIT_FFI_EXPORT void orby_gtk_request_close(uint64_t host) {
   GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
   GtkWidget *window = fixed == NULL ? NULL : GTK_WIDGET(g_object_get_data(G_OBJECT(fixed), "orby-window"));
@@ -134,6 +159,11 @@ MOONBIT_FFI_EXPORT void orby_gtk_set_title(uint64_t h, moonbit_bytes_t t) { (voi
 MOONBIT_FFI_EXPORT void orby_gtk_request_redraw(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_visible(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_resizable(uint64_t h, int32_t r) { (void)h; (void)r; }
+MOONBIT_FFI_EXPORT void orby_gtk_set_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_inner_width(uint64_t h) { (void)h; return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_inner_height(uint64_t h) { (void)h; return 0; }
+MOONBIT_FFI_EXPORT double orby_gtk_scale_factor(uint64_t h) { (void)h; return 1.0; }
+MOONBIT_FFI_EXPORT void orby_gtk_set_outer_position(uint64_t h, int32_t x, int32_t y) { (void)h; (void)x; (void)y; }
 MOONBIT_FFI_EXPORT void orby_gtk_request_close(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_gtk_exit(int32_t c) { (void)c; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_event_callback(void *c, void *p) { (void)c; (void)p; }

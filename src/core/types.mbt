@@ -1,4 +1,5 @@
 ///|
+/// Physical client-area size in native pixels.
 pub(all) struct Size {
   width : Int
   height : Int
@@ -18,6 +19,77 @@ pub fn Size::new(width~ : Int, height~ : Int) -> Size {
       height
     },
   }
+}
+
+///|
+pub fn validate_scale_factor(scale_factor : Double) -> Bool {
+  scale_factor > 0.0 &&
+  !Double::is_nan(scale_factor) &&
+  !Double::is_inf(scale_factor)
+}
+
+///|
+/// Device-independent size. Convert explicitly with a valid scale factor
+/// before passing dimensions to a native window.
+pub(all) struct LogicalSize {
+  width : Double
+  height : Double
+} derive(Eq, Debug)
+
+///|
+pub fn LogicalSize::new(width~ : Double, height~ : Double) -> LogicalSize {
+  {
+    width: if width > 0.0 && !Double::is_nan(width) && !Double::is_inf(width) {
+      width
+    } else {
+      1.0
+    },
+    height: if height > 0.0 &&
+      !Double::is_nan(height) &&
+      !Double::is_inf(height) {
+      height
+    } else {
+      1.0
+    },
+  }
+}
+
+///|
+pub fn LogicalSize::to_physical(
+  self : LogicalSize,
+  scale_factor : Double,
+) -> Size {
+  guard validate_scale_factor(scale_factor) else {
+    abort("scale_factor must be finite and positive")
+  }
+  Size::new(
+    width=(self.width * scale_factor).to_int(),
+    height=(self.height * scale_factor).to_int(),
+  )
+}
+
+///|
+pub fn Size::to_logical(self : Size, scale_factor : Double) -> LogicalSize {
+  guard validate_scale_factor(scale_factor) else {
+    abort("scale_factor must be finite and positive")
+  }
+  LogicalSize::new(
+    width=self.width.to_double() / scale_factor,
+    height=self.height.to_double() / scale_factor,
+  )
+}
+
+///|
+/// Physical desktop coordinate. Wayland compositors may ignore position
+/// requests.
+pub(all) struct Position {
+  x : Int
+  y : Int
+} derive(Eq, Debug)
+
+///|
+pub fn Position::new(x~ : Int, y~ : Int) -> Position {
+  { x, y }
 }
 
 ///|
