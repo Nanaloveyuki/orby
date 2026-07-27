@@ -134,6 +134,20 @@ pub fn Window::set_fullscreen(self : Window, fullscreen : Bool) -> Unit {
 }
 
 ///|
+/// Requests fullscreen on a current monitor snapshot.
+pub fn Window::set_fullscreen_on(
+  self : Window,
+  monitor : @core.MonitorId,
+) -> Unit raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  if !native_set_fullscreen_on(self.hwnd, monitor.index()) {
+    raise @core.WindowError::MonitorUnavailable(monitor)
+  }
+}
+
+///|
 /// Returns Orby's managed fullscreen state for this Win32 window.
 pub fn Window::is_fullscreen(self : Window) -> Bool raise @core.WindowError {
   if !self.alive.val {

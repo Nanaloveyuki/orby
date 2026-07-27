@@ -325,5 +325,6 @@ pub(all) suberror InitError {
 ///|
 pub(all) suberror WindowError {
   CreationFailed(String)
+  MonitorUnavailable(MonitorId)
   Destroyed
 } derive(Debug)
