@@ -24,6 +24,28 @@ pub fn EventLoop::EventLoop() -> EventLoop {
 }
 
 ///|
+/// Returns the primary monitor when the native desktop exposes one.
+pub fn EventLoop::primary_monitor(_self : EventLoop) -> @core.Monitor? {
+  if !native_has_primary_monitor() {
+    None
+  } else {
+    Some(
+      @core.Monitor::new(
+        x=native_primary_monitor_metric(0),
+        y=native_primary_monitor_metric(1),
+        width=native_primary_monitor_metric(2),
+        height=native_primary_monitor_metric(3),
+        work_x=native_primary_monitor_metric(4),
+        work_y=native_primary_monitor_metric(5),
+        work_width=native_primary_monitor_metric(6),
+        work_height=native_primary_monitor_metric(7),
+        scale_factor=native_primary_monitor_scale(),
+      ),
+    )
+  }
+}
+
+///|
 fn EventLoop::active(self : EventLoop) -> ActiveApp {
   { next_window_id: self.next_window_id }
 }

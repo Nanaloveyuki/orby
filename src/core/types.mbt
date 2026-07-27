@@ -93,6 +93,67 @@ pub fn Position::new(x~ : Int, y~ : Int) -> Position {
 }
 
 ///|
+/// Monitor bounds in the native desktop coordinate system. These values are
+/// not interchangeable with physical client pixels on every backend; use
+/// `scale_factor` when converting for a specific platform.
+pub(all) struct Monitor {
+  x : Int
+  y : Int
+  width : Int
+  height : Int
+  work_x : Int
+  work_y : Int
+  work_width : Int
+  work_height : Int
+  scale_factor : Double
+} derive(Eq, Debug)
+
+///|
+pub fn Monitor::new(
+  x~ : Int,
+  y~ : Int,
+  width~ : Int,
+  height~ : Int,
+  work_x~ : Int,
+  work_y~ : Int,
+  work_width~ : Int,
+  work_height~ : Int,
+  scale_factor~ : Double,
+) -> Monitor {
+  {
+    x,
+    y,
+    width: if width < 1 {
+      1
+    } else {
+      width
+    },
+    height: if height < 1 {
+      1
+    } else {
+      height
+    },
+    work_x,
+    work_y,
+    work_width: if work_width < 1 {
+      1
+    } else {
+      work_width
+    },
+    work_height: if work_height < 1 {
+      1
+    } else {
+      work_height
+    },
+    scale_factor: if validate_scale_factor(scale_factor) {
+      scale_factor
+    } else {
+      1.0
+    },
+  }
+}
+
+///|
 pub(all) struct WindowId {
   raw : Int
 } derive(Eq, Debug)

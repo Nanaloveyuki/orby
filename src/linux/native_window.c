@@ -41,6 +41,31 @@ static GtkWidget *window_from_host(uint64_t host) {
   return fixed == NULL ? NULL : GTK_WIDGET(g_object_get_data(G_OBJECT(fixed), "orby-window"));
 }
 
+static GdkMonitor *primary_monitor(void) {
+  GdkDisplay *display = gdk_display_get_default();
+  return display == NULL ? NULL : gdk_display_get_primary_monitor(display);
+}
+
+static GdkMonitor *current_monitor(uint64_t host) {
+  GtkWidget *window = window_from_host(host);
+  GdkWindow *surface = window == NULL ? NULL : gtk_widget_get_window(window);
+  GdkDisplay *display = surface == NULL ? NULL : gdk_window_get_display(surface);
+  return display == NULL ? NULL : gdk_display_get_monitor_at_window(display, surface);
+}
+
+static int32_t monitor_metric(GdkMonitor *monitor, int32_t metric) {
+  if (monitor == NULL) return 0;
+  GdkRectangle rect;
+  if (metric < 4) gdk_monitor_get_geometry(monitor, &rect);
+  else gdk_monitor_get_workarea(monitor, &rect);
+  switch (metric % 4) {
+  case 0: return rect.x;
+  case 1: return rect.y;
+  case 2: return rect.width;
+  default: return rect.height;
+  }
+}
+
 static OrbySizeConstraints *constraints_from_host(GtkWidget *fixed, int create) {
   if (fixed == NULL) return NULL;
   OrbySizeConstraints *constraints = g_object_get_data(G_OBJECT(fixed), "orby-size-constraints");
@@ -313,6 +338,18 @@ MOONBIT_FFI_EXPORT void orby_gtk_exit(int32_t code) {
   request_exit(code);
 }
 MOONBIT_FFI_EXPORT void orby_gtk_set_control_flow(int32_t poll) { poll_mode = poll != 0; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_has_primary_monitor(void) { return primary_monitor() != NULL; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_primary_monitor_metric(int32_t metric) { return monitor_metric(primary_monitor(), metric); }
+MOONBIT_FFI_EXPORT double orby_gtk_primary_monitor_scale(void) {
+  GdkMonitor *monitor = primary_monitor();
+  return monitor == NULL ? 1.0 : (double)gdk_monitor_get_scale_factor(monitor);
+}
+MOONBIT_FFI_EXPORT int32_t orby_gtk_has_current_monitor(uint64_t host) { return current_monitor(host) != NULL; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_current_monitor_metric(uint64_t host, int32_t metric) { return monitor_metric(current_monitor(host), metric); }
+MOONBIT_FFI_EXPORT double orby_gtk_current_monitor_scale(uint64_t host) {
+  GdkMonitor *monitor = current_monitor(host);
+  return monitor == NULL ? 1.0 : (double)gdk_monitor_get_scale_factor(monitor);
+}
 MOONBIT_FFI_EXPORT void orby_gtk_set_event_callback(orby_event_callback callback, void *context) {
   if (event_context != NULL) moonbit_decref(event_context);
   event_callback = callback;
@@ -362,6 +399,12 @@ MOONBIT_FFI_EXPORT void orby_gtk_set_outer_position(uint64_t h, int32_t x, int32
 MOONBIT_FFI_EXPORT void orby_gtk_request_close(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_gtk_exit(int32_t c) { (void)c; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_control_flow(int32_t p) { (void)p; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_has_primary_monitor(void) { return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_primary_monitor_metric(int32_t m) { (void)m; return 0; }
+MOONBIT_FFI_EXPORT double orby_gtk_primary_monitor_scale(void) { return 1.0; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_has_current_monitor(uint64_t h) { (void)h; return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_current_monitor_metric(uint64_t h, int32_t m) { (void)h; (void)m; return 0; }
+MOONBIT_FFI_EXPORT double orby_gtk_current_monitor_scale(uint64_t h) { (void)h; return 1.0; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_event_callback(void *c, void *p) { (void)c; (void)p; }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) { return 1; }
 #endif
