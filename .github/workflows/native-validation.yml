@@ -56,6 +56,10 @@ jobs:
         shell: powershell
         run: moon run src/examples/windows_smoke --target native
 
+      - name: Run MoonView WebView2 smoke
+        shell: powershell
+        run: moon run src/examples/moonview_windows --target native
+
   linux:
     name: Linux native
     runs-on: ubuntu-latest
@@ -87,3 +91,6 @@ jobs:
 
       - name: Run GTK3 smoke
         run: xvfb-run --auto-servernum sh scripts/run-linux-smoke.sh
+
+      - name: Run MoonView WebKitGTK smoke
+        run: xvfb-run --auto-servernum sh scripts/run-moonview-linux-smoke.sh

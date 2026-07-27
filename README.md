@@ -10,7 +10,7 @@ embedding hosts for native consumers such as MoonView.
 
 The initial implementation targets a small application lifecycle, native
 windows, resize/DPI/focus/redraw events, and WebView-ready host containers.
-MoonView integration is validated after its Mooncakes package is available.
+MoonView integration is validated on both supported platforms in CI.
 
 `CloseRequested` is application-controlled: call `Window::destroy` from the
 event handler to accept it, or do nothing to cancel it. `request_close` uses
@@ -18,6 +18,10 @@ the same path for programmatic closure. Destroying the final window ends the
 event loop automatically; `ActiveApp::exit_with_code` can set a process result.
 Calls on a destroyed `Window` are safe no-ops; use `is_destroyed` before
 retaining or reusing a window handle across lifecycle callbacks.
+
+Commands on a destroyed window are no-ops. Queries, `webview_host`, and
+`WebViewHost::native_handle` require a live native window and raise
+`WindowError::Destroyed`. Destroy the MoonView instance before its Orby window.
 
 Window `Size` values are physical client-area pixels. Use `LogicalSize` with a
 window's `scale_factor` for device-independent layout, and use `inner_size` /
