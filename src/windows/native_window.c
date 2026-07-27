@@ -13,6 +13,8 @@ static void *event_context = NULL;
 static int initialized_com = 0;
 static int32_t window_count = 0;
 static int exit_requested = 0;
+static int32_t exit_code = 0;
+static int poll_mode = 0;
 static HWND tracked_mouse_window = NULL;
 static uint16_t pending_high_surrogate = 0;
 
@@ -96,6 +98,10 @@ static void emit_event(HWND hwnd, int32_t kind, int32_t arg0, int32_t arg1, doub
   if (event_callback == NULL) return;
   const int32_t id = (int32_t)(intptr_t)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
   if (id > 0) event_callback(event_context, kind, id, arg0, arg1, argd0, argd1);
+}
+
+static void emit_application_event(int32_t kind) {
+  if (event_callback != NULL) event_callback(event_context, kind, 0, 0, 0, 0.0, 0.0);
 }
 
 static int32_t current_modifiers(void) {
@@ -231,6 +237,8 @@ MOONBIT_FFI_EXPORT int32_t orby_win_init(void) {
   else if (result == RPC_E_CHANGED_MODE) return 0;
   window_count = 0;
   exit_requested = 0;
+  exit_code = 0;
+  poll_mode = 0;
   SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
   WNDCLASSEXW wc = {0};
   wc.cbSize = sizeof(wc);
@@ -355,8 +363,10 @@ MOONBIT_FFI_EXPORT void orby_win_request_close(uint64_t hwnd) {
 }
 MOONBIT_FFI_EXPORT void orby_win_exit(int32_t code) {
   exit_requested = 1;
+  exit_code = code;
   PostQuitMessage(code);
 }
+MOONBIT_FFI_EXPORT void orby_win_set_control_flow(int32_t poll) { poll_mode = poll != 0; }
 MOONBIT_FFI_EXPORT void orby_win_set_event_callback(orby_event_callback callback, void *context) {
   if (event_context != NULL) moonbit_decref(event_context);
   event_callback = callback;
@@ -365,12 +375,44 @@ MOONBIT_FFI_EXPORT void orby_win_set_event_callback(orby_event_callback callback
 MOONBIT_FFI_EXPORT int32_t orby_win_run(void) {
   MSG message;
   int32_t code = 0;
-  while (GetMessageW(&message, NULL, 0, 0) > 0) { TranslateMessage(&message); DispatchMessageW(&message); }
-  code = (int32_t)message.wParam;
+  for (;;) {
+    while (PeekMessageW(&message, NULL, 0, 0, PM_REMOVE)) {
+      if (message.message == WM_QUIT) {
+        code = (int32_t)message.wParam;
+        goto finish;
+      }
+      TranslateMessage(&message);
+      DispatchMessageW(&message);
+      if (exit_requested) {
+        code = exit_code;
+        goto finish;
+      }
+    }
+    emit_application_event(14);
+    if (exit_requested) {
+      code = exit_code;
+      break;
+    }
+    if (poll_mode) continue;
+    int message_result = GetMessageW(&message, NULL, 0, 0);
+    if (message_result <= 0) {
+      code = message_result == 0 ? (int32_t)message.wParam : 1;
+      break;
+    }
+    TranslateMessage(&message);
+    DispatchMessageW(&message);
+    if (exit_requested) {
+      code = exit_code;
+      break;
+    }
+  }
+finish:
   event_callback = NULL;
   if (event_context != NULL) moonbit_decref(event_context);
   event_context = NULL;
   exit_requested = 0;
+  exit_code = 0;
+  poll_mode = 0;
   if (initialized_com) { CoUninitialize(); initialized_com = 0; }
   return code;
 }
@@ -398,6 +440,7 @@ MOONBIT_FFI_EXPORT double orby_win_scale_factor(uint64_t h) { (void)h; return 1.
 MOONBIT_FFI_EXPORT void orby_win_set_outer_position(uint64_t h, int32_t x, int32_t y) { (void)h; (void)x; (void)y; }
 MOONBIT_FFI_EXPORT void orby_win_request_close(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_exit(int32_t c) { (void)c; }
+MOONBIT_FFI_EXPORT void orby_win_set_control_flow(int32_t p) { (void)p; }
 MOONBIT_FFI_EXPORT void orby_win_set_event_callback(void *c, void *p) { (void)c; (void)p; }
 MOONBIT_FFI_EXPORT int32_t orby_win_run(void) { return 1; }
 #endif

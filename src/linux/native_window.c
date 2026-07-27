@@ -9,6 +9,7 @@ static void *event_context = NULL;
 static int exit_requested = 0;
 static int32_t exit_code = 0;
 static int32_t window_count = 0;
+static int poll_mode = 0;
 
 typedef struct {
   int32_t min_width;
@@ -23,6 +24,10 @@ static int32_t window_id(GtkWidget *fixed) {
 
 static void emit_event(GtkWidget *fixed, int32_t kind, int32_t arg0, int32_t arg1, double argd0, double argd1) {
   if (event_callback != NULL) event_callback(event_context, kind, window_id(fixed), arg0, arg1, argd0, argd1);
+}
+
+static void emit_application_event(int32_t kind) {
+  if (event_callback != NULL) event_callback(event_context, kind, 0, 0, 0, 0.0, 0.0);
 }
 
 static void request_exit(int32_t code) {
@@ -151,6 +156,7 @@ MOONBIT_FFI_EXPORT int32_t orby_gtk_init(void) {
   exit_requested = 0;
   exit_code = 0;
   window_count = 0;
+  poll_mode = 0;
   return 1;
 }
 MOONBIT_FFI_EXPORT uint64_t orby_gtk_create_window(moonbit_bytes_t title, int32_t width, int32_t height, int32_t visible, int32_t resizable, int32_t id) {
@@ -294,19 +300,27 @@ MOONBIT_FFI_EXPORT void orby_gtk_request_close(uint64_t host) {
 MOONBIT_FFI_EXPORT void orby_gtk_exit(int32_t code) {
   request_exit(code);
 }
+MOONBIT_FFI_EXPORT void orby_gtk_set_control_flow(int32_t poll) { poll_mode = poll != 0; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_event_callback(orby_event_callback callback, void *context) {
   if (event_context != NULL) moonbit_decref(event_context);
   event_callback = callback;
   event_context = context;
 }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) {
-  if (!exit_requested) gtk_main();
+  while (!exit_requested) {
+    while (gtk_events_pending()) gtk_main_iteration();
+    if (exit_requested) break;
+    emit_application_event(14);
+    if (exit_requested || poll_mode) continue;
+    gtk_main_iteration();
+  }
   int32_t code = exit_code;
   event_callback = NULL;
   if (event_context != NULL) moonbit_decref(event_context);
   event_context = NULL;
   exit_requested = 0;
   exit_code = 0;
+  poll_mode = 0;
   return code;
 }
 #else
@@ -333,6 +347,7 @@ MOONBIT_FFI_EXPORT double orby_gtk_scale_factor(uint64_t h) { (void)h; return 1.
 MOONBIT_FFI_EXPORT void orby_gtk_set_outer_position(uint64_t h, int32_t x, int32_t y) { (void)h; (void)x; (void)y; }
 MOONBIT_FFI_EXPORT void orby_gtk_request_close(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_gtk_exit(int32_t c) { (void)c; }
+MOONBIT_FFI_EXPORT void orby_gtk_set_control_flow(int32_t p) { (void)p; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_event_callback(void *c, void *p) { (void)c; (void)p; }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) { return 1; }
 #endif

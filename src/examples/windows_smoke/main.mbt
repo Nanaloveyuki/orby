@@ -1,10 +1,12 @@
 ///|
 struct Smoke {
   mut window : @windows.Window?
+  mut control_flow_switched : Bool
 }
 
 ///|
 pub impl @windows.App for Smoke with fn started(self, app) {
+  app.set_control_flow(@core.ControlFlow::Poll)
   let window = try! app.create_window(
     @core.WindowOptions::new(title="Orby Win32 smoke", visible=true),
   )
@@ -43,7 +45,6 @@ pub impl @windows.App for Smoke with fn started(self, app) {
   window.set_resizable(false)
   window.set_visible(true)
   window.request_redraw()
-  window.request_close()
 }
 
 ///|
@@ -55,6 +56,9 @@ pub impl @windows.App for Smoke with fn window_event(self, app, _id, event) {
         None => ()
       }
     @core.WindowEvent::Destroyed => {
+      if !self.control_flow_switched {
+        abort("Orby Win32 smoke expected a control-flow callback")
+      }
       match self.window {
         Some(window) => {
           if !window.is_destroyed() {
@@ -78,11 +82,23 @@ pub impl @windows.App for Smoke with fn window_event(self, app, _id, event) {
 }
 
 ///|
+pub impl @windows.App for Smoke with fn about_to_wait(self, app) {
+  if !self.control_flow_switched {
+    self.control_flow_switched = true
+    app.set_control_flow(@core.ControlFlow::Wait)
+    match self.window {
+      Some(window) => window.request_close()
+      None => ()
+    }
+  }
+}
+
+///|
 fn main {
   println("orby windows smoke: initializing")
   let event_loop = try! @windows.EventLoop::new()
   println("orby windows smoke: running")
-  let app = { window: None }
+  let app = { window: None, control_flow_switched: false }
   let code = event_loop.run_app(app)
   println("orby windows smoke: exited \{code}")
   if code != 23 {

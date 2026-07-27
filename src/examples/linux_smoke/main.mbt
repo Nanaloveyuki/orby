@@ -1,10 +1,12 @@
 ///|
 struct Smoke {
   mut window : @linux.Window?
+  mut control_flow_switched : Bool
 }
 
 ///|
 pub impl @linux.App for Smoke with fn started(self, app) {
+  app.set_control_flow(@core.ControlFlow::Poll)
   let window = try! app.create_window(
     @core.WindowOptions::new(title="Orby GTK smoke", visible=true),
   )
@@ -35,7 +37,6 @@ pub impl @linux.App for Smoke with fn started(self, app) {
   window.set_resizable(false)
   window.set_visible(true)
   window.request_redraw()
-  window.request_close()
 }
 
 ///|
@@ -47,6 +48,9 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
         None => ()
       }
     @core.WindowEvent::Destroyed => {
+      if !self.control_flow_switched {
+        abort("Orby GTK smoke expected a control-flow callback")
+      }
       match self.window {
         Some(window) => {
           if !window.is_destroyed() {
@@ -70,9 +74,21 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
 }
 
 ///|
+pub impl @linux.App for Smoke with fn about_to_wait(self, app) {
+  if !self.control_flow_switched {
+    self.control_flow_switched = true
+    app.set_control_flow(@core.ControlFlow::Wait)
+    match self.window {
+      Some(window) => window.request_close()
+      None => ()
+    }
+  }
+}
+
+///|
 fn main {
   let event_loop = try! @linux.EventLoop::new()
-  let app = { window: None }
+  let app = { window: None, control_flow_switched: false }
   let code = event_loop.run_app(app)
   if code != 23 {
     abort("Orby GTK smoke failed with exit code \{code}")

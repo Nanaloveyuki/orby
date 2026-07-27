@@ -87,6 +87,9 @@ extern "C" fn native_request_close(hwnd : UInt64) -> Unit = "orby_win_request_cl
 extern "C" fn native_exit(code : Int) -> Unit = "orby_win_exit"
 
 ///|
+extern "C" fn native_set_control_flow(poll : Bool) -> Unit = "orby_win_set_control_flow"
+
+///|
 #borrow(call_closure)
 #owned(callback)
 extern "C" fn native_set_event_callback(
