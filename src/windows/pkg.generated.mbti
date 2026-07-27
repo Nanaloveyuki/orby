@@ -32,15 +32,17 @@ pub fn WebViewHost::native_handle(Self) -> UInt64
 
 pub struct Window {
   // private fields
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn Window::destroy(Self) -> Unit
 pub fn Window::id(Self) -> @core.WindowId
+pub fn Window::is_destroyed(Self) -> Bool
 pub fn Window::request_close(Self) -> Unit
 pub fn Window::request_redraw(Self) -> Unit
 pub fn Window::set_resizable(Self, Bool) -> Unit
 pub fn Window::set_title(Self, String) -> Unit
 pub fn Window::set_visible(Self, Bool) -> Unit
 pub fn Window::webview_host(Self) -> WebViewHost
+pub impl Eq for Window
 
 // Type aliases
 

@@ -46,7 +46,7 @@ pub fn ActiveApp::create_window(
   if hwnd == 0UL {
     raise @core.WindowError::CreationFailed("CreateWindowExW returned null")
   }
-  { id_: @core.WindowId::from_raw(id), hwnd }
+  { id_: @core.WindowId::from_raw(id), hwnd, alive: Ref(true) }
 }
 
 ///|

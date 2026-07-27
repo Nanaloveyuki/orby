@@ -46,7 +46,7 @@ pub fn ActiveApp::create_window(
   if fixed == 0UL {
     raise @core.WindowError::CreationFailed("GTK window creation failed")
   }
-  { id_: @core.WindowId::from_raw(id), fixed }
+  { id_: @core.WindowId::from_raw(id), fixed, alive: Ref(true) }
 }
 
 ///|
