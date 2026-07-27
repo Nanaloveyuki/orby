@@ -16,6 +16,7 @@ pub struct ActiveApp {
 } derive(@debug.Debug)
 pub fn ActiveApp::create_window(Self, @core.WindowOptions) -> Window raise @core.WindowError
 pub fn ActiveApp::exit(Self) -> Unit
+pub fn ActiveApp::exit_with_code(Self, Int) -> Unit
 
 pub struct EventLoop {
   // private fields
@@ -34,8 +35,11 @@ pub struct Window {
 } derive(Eq, @debug.Debug)
 pub fn Window::destroy(Self) -> Unit
 pub fn Window::id(Self) -> @core.WindowId
+pub fn Window::request_close(Self) -> Unit
 pub fn Window::request_redraw(Self) -> Unit
+pub fn Window::set_resizable(Self, Bool) -> Unit
 pub fn Window::set_title(Self, String) -> Unit
+pub fn Window::set_visible(Self, Bool) -> Unit
 pub fn Window::webview_host(Self) -> WebViewHost
 
 // Type aliases
@@ -47,3 +51,4 @@ pub(open) trait App {
   fn about_to_wait(Self, ActiveApp) -> Unit = _
   fn exiting(Self, ActiveApp) -> Unit = _
 }
+

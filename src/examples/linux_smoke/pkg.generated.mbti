@@ -2,6 +2,7 @@
 package "Nanaloveyuki/orby/examples/linux_smoke"
 
 import {
+  "Nanaloveyuki/orby/core",
   "Nanaloveyuki/orby/linux",
 }
 
@@ -16,3 +17,4 @@ pub impl @linux.App for Smoke
 // Type aliases
 
 // Traits
+

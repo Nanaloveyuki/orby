@@ -51,7 +51,12 @@ pub fn ActiveApp::create_window(
 
 ///|
 pub fn ActiveApp::exit(_self : ActiveApp) -> Unit {
-  native_exit()
+  native_exit(0)
+}
+
+///|
+pub fn ActiveApp::exit_with_code(_self : ActiveApp, code : Int) -> Unit {
+  native_exit(code)
 }
 
 ///|

@@ -12,6 +12,11 @@ The initial implementation targets a small application lifecycle, native
 windows, resize/DPI/focus/redraw events, and WebView-ready host containers.
 MoonView integration is validated after its Mooncakes package is available.
 
+`CloseRequested` is application-controlled: call `Window::destroy` from the
+event handler to accept it, or do nothing to cancel it. `request_close` uses
+the same path for programmatic closure. Destroying the final window ends the
+event loop automatically; `ActiveApp::exit_with_code` can set a process result.
+
 ## Validation
 
 ```powershell
