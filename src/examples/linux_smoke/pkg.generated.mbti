@@ -1,0 +1,18 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Nanaloveyuki/orby/examples/linux_smoke"
+
+import {
+  "Nanaloveyuki/orby/linux",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type Smoke
+pub impl @linux.App for Smoke
+
+// Type aliases
+
+// Traits

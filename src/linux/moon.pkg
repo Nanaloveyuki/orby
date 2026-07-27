@@ -1,0 +1,17 @@
+import {
+  "moonbitlang/core/encoding/utf8",
+  "Nanaloveyuki/orby/core",
+}
+
+supported_targets = "native"
+
+options(
+  "native-stub": [ "native_window.c" ],
+  link: {
+    "native": {
+      "stub-cc-flags": "${build.ORBY_GTK_STUB_CC_FLAGS}",
+      "cc-link-flags": "${build.ORBY_GTK_CC_LINK_FLAGS}",
+    },
+  },
+  targets: { "ffi.mbt": [ "native" ] },
+)

@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Nanaloveyuki/orby/examples/moonview_windows"
+
+import {
+  "Nanaloveyuki/orby/core",
+  "Nanaloveyuki/orby/windows",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type Smoke
+pub impl @windows.App for Smoke
+
+// Type aliases
+
+// Traits
