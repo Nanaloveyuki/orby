@@ -195,7 +195,14 @@ MOONBIT_FFI_EXPORT void orby_gtk_set_title(uint64_t host, moonbit_bytes_t title)
   GtkWidget *window = fixed == NULL ? NULL : GTK_WIDGET(g_object_get_data(G_OBJECT(fixed), "orby-window"));
   if (window != NULL) gtk_window_set_title(GTK_WINDOW(window), (const char *)title);
 }
-MOONBIT_FFI_EXPORT void orby_gtk_request_redraw(uint64_t host) { if (host != 0) gtk_widget_queue_draw((GtkWidget *)(uintptr_t)host); }
+MOONBIT_FFI_EXPORT void orby_gtk_request_redraw(uint64_t host) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
+  GtkWidget *window = window_from_host(host);
+  if (fixed != NULL && window != NULL) {
+    gtk_widget_queue_draw(window);
+    emit_event(fixed, 6, 0, 0, 0.0, 0.0);
+  }
+}
 MOONBIT_FFI_EXPORT void orby_gtk_set_visible(uint64_t host, int32_t visible) {
   GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
   GtkWidget *window = fixed == NULL ? NULL : GTK_WIDGET(g_object_get_data(G_OBJECT(fixed), "orby-window"));
