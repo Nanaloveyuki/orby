@@ -114,6 +114,78 @@ pub(all) enum ControlFlow {
 } derive(Eq, Debug)
 
 ///|
+/// State of a keyboard or pointer button.
+pub(all) enum InputState {
+  Pressed
+  Released
+} derive(Eq, Debug)
+
+///|
+/// Cross-platform modifier state sampled with an input event.
+pub(all) struct Modifiers {
+  shift : Bool
+  control : Bool
+  alt : Bool
+  meta : Bool
+} derive(Eq, Debug)
+
+///|
+pub fn Modifiers::new(
+  shift? : Bool = false,
+  control? : Bool = false,
+  alt? : Bool = false,
+  meta? : Bool = false,
+) -> Modifiers {
+  { shift, control, alt, meta }
+}
+
+///| A platform-native keyboard code. Codes are intentionally not normalized
+
+///|
+/// between Win32 and GTK; use `TextInput` for layout-aware text.
+pub(all) struct NativeKeyEvent {
+  code : Int
+  state : InputState
+  repeat : Bool
+  modifiers : Modifiers
+} derive(Eq, Debug)
+
+///|
+pub fn NativeKeyEvent::new(
+  code~ : Int,
+  state~ : InputState,
+  repeat? : Bool = false,
+  modifiers? : Modifiers = Modifiers::new(),
+) -> NativeKeyEvent {
+  { code, state, repeat, modifiers }
+}
+
+///|
+/// Pointer buttons normalized across Win32 and GTK.
+pub(all) enum MouseButton {
+  Left
+  Right
+  Middle
+  Back
+  Forward
+  Other(Int)
+} derive(Eq, Debug)
+
+///| Scroll values are backend-native smooth deltas when available, otherwise
+
+///|
+/// unit line steps. Positive values move right and down.
+pub(all) struct ScrollDelta {
+  x : Double
+  y : Double
+} derive(Eq, Debug)
+
+///|
+pub fn ScrollDelta::new(x~ : Double, y~ : Double) -> ScrollDelta {
+  { x, y }
+}
+
+///|
 pub(all) enum WindowEvent {
   CloseRequested
   Destroyed
@@ -121,6 +193,14 @@ pub(all) enum WindowEvent {
   ScaleFactorChanged(Double)
   FocusChanged(Bool)
   RedrawRequested
+  KeyInput(NativeKeyEvent)
+  /// A printable Unicode scalar. IME composition is not represented yet.
+  TextInput(String)
+  PointerMoved(Position)
+  PointerEntered
+  PointerLeft
+  MouseInput(MouseButton, InputState, Modifiers)
+  MouseWheel(ScrollDelta, Modifiers)
 } derive(Debug)
 
 ///|

@@ -24,6 +24,11 @@ window's `scale_factor` for device-independent layout, and use `inner_size` /
 `set_inner_size` when sizing native content. `set_outer_position` is a request
 that may be ignored by a Wayland compositor.
 
+Keyboard and pointer input arrive through `WindowEvent`. `NativeKeyEvent.code`
+is intentionally backend-native, while `TextInput` carries printable Unicode
+text and modifiers use `Shift`, `Control`, `Alt`, and `Meta`. IME composition,
+touch, and raw device events remain outside the current API.
+
 ## Validation
 
 ```powershell

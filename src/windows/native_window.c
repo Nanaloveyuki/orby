@@ -5,7 +5,7 @@
 #include <moonbit.h>
 #include <stdint.h>
 
-typedef void (*orby_event_callback)(void *, int32_t, int32_t, int32_t, int32_t, double);
+typedef void (*orby_event_callback)(void *, int32_t, int32_t, int32_t, int32_t, double, double);
 
 static const wchar_t *ORBY_CLASS = L"OrbyWindow";
 static orby_event_callback event_callback = NULL;
@@ -13,6 +13,8 @@ static void *event_context = NULL;
 static int initialized_com = 0;
 static int32_t window_count = 0;
 static int exit_requested = 0;
+static HWND tracked_mouse_window = NULL;
+static uint16_t pending_high_surrogate = 0;
 
 static void client_to_outer_rect(DWORD style, DWORD ex_style, int32_t width, int32_t height, RECT *rect) {
   rect->left = 0;
@@ -22,41 +24,128 @@ static void client_to_outer_rect(DWORD style, DWORD ex_style, int32_t width, int
   AdjustWindowRectEx(rect, style, FALSE, ex_style);
 }
 
-static void emit_event(HWND hwnd, int32_t kind, int32_t arg0, int32_t arg1, double argd) {
+static void emit_event(HWND hwnd, int32_t kind, int32_t arg0, int32_t arg1, double argd0, double argd1) {
   if (event_callback == NULL) return;
   const int32_t id = (int32_t)(intptr_t)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-  if (id > 0) event_callback(event_context, kind, id, arg0, arg1, argd);
+  if (id > 0) event_callback(event_context, kind, id, arg0, arg1, argd0, argd1);
+}
+
+static int32_t current_modifiers(void) {
+  int32_t modifiers = 0;
+  if (GetKeyState(VK_SHIFT) < 0) modifiers |= 1;
+  if (GetKeyState(VK_CONTROL) < 0) modifiers |= 2;
+  if (GetKeyState(VK_MENU) < 0) modifiers |= 4;
+  if (GetKeyState(VK_LWIN) < 0 || GetKeyState(VK_RWIN) < 0) modifiers |= 8;
+  return modifiers;
+}
+
+static void emit_text(HWND hwnd, uint32_t codepoint) {
+  if (codepoint >= 0x20 && codepoint != 0x7F && codepoint <= 0x10FFFF) {
+    emit_event(hwnd, 8, (int32_t)codepoint, 0, 0.0, 0.0);
+  }
+}
+
+static void emit_utf16_text(HWND hwnd, uint16_t unit) {
+  if (unit >= 0xD800 && unit <= 0xDBFF) {
+    pending_high_surrogate = unit;
+    return;
+  }
+  if (unit >= 0xDC00 && unit <= 0xDFFF && pending_high_surrogate != 0) {
+    uint32_t codepoint = 0x10000 + (((uint32_t)pending_high_surrogate - 0xD800) << 10) + (unit - 0xDC00);
+    pending_high_surrogate = 0;
+    emit_text(hwnd, codepoint);
+    return;
+  }
+  pending_high_surrogate = 0;
+  if (unit < 0xD800 || unit > 0xDFFF) emit_text(hwnd, unit);
 }
 
 static LRESULT CALLBACK orby_wndproc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
   switch (message) {
   case WM_CLOSE:
-    emit_event(hwnd, 1, 0, 0, 0.0);
+    emit_event(hwnd, 1, 0, 0, 0.0, 0.0);
     return 0;
   case WM_DESTROY:
     if (window_count > 0) window_count--;
-    emit_event(hwnd, 2, 0, 0, 0.0);
+    if (tracked_mouse_window == hwnd) tracked_mouse_window = NULL;
+    emit_event(hwnd, 2, 0, 0, 0.0, 0.0);
     if (window_count == 0 && !exit_requested) PostQuitMessage(0);
     return 0;
   case WM_SIZE:
-    emit_event(hwnd, 3, LOWORD(lparam), HIWORD(lparam), 0.0);
+    emit_event(hwnd, 3, LOWORD(lparam), HIWORD(lparam), 0.0, 0.0);
     return 0;
   case WM_DPICHANGED:
-    emit_event(hwnd, 4, 0, 0, (double)HIWORD(wparam) / 96.0);
+    emit_event(hwnd, 4, 0, 0, (double)HIWORD(wparam) / 96.0, 0.0);
     return 0;
   case WM_SETFOCUS:
-    emit_event(hwnd, 5, 1, 0, 0.0);
+    emit_event(hwnd, 5, 1, 0, 0.0, 0.0);
     return 0;
   case WM_KILLFOCUS:
-    emit_event(hwnd, 5, 0, 0, 0.0);
+    emit_event(hwnd, 5, 0, 0, 0.0, 0.0);
     return 0;
   case WM_PAINT: {
     PAINTSTRUCT paint;
     BeginPaint(hwnd, &paint);
     EndPaint(hwnd, &paint);
-    emit_event(hwnd, 6, 0, 0, 0.0);
+    emit_event(hwnd, 6, 0, 0, 0.0, 0.0);
     return 0;
   }
+  case WM_KEYDOWN:
+  case WM_SYSKEYDOWN: {
+    int32_t flags = current_modifiers() | 16;
+    if ((lparam & 0x40000000) != 0) flags |= 32;
+    emit_event(hwnd, 7, (int32_t)wparam, flags, 0.0, 0.0);
+    return 0;
+  }
+  case WM_KEYUP:
+  case WM_SYSKEYUP:
+    emit_event(hwnd, 7, (int32_t)wparam, current_modifiers(), 0.0, 0.0);
+    return 0;
+  case WM_CHAR:
+    emit_utf16_text(hwnd, (uint16_t)wparam);
+    return 0;
+  case WM_UNICHAR:
+    if (wparam == UNICODE_NOCHAR) return TRUE;
+    emit_text(hwnd, (uint32_t)wparam);
+    return 0;
+  case WM_MOUSEMOVE: {
+    if (tracked_mouse_window != hwnd) {
+      if (tracked_mouse_window != NULL) emit_event(tracked_mouse_window, 11, 0, 0, 0.0, 0.0);
+      tracked_mouse_window = hwnd;
+      TRACKMOUSEEVENT tracking = { sizeof(tracking), TME_LEAVE, hwnd, 0 };
+      TrackMouseEvent(&tracking);
+      emit_event(hwnd, 10, 0, 0, 0.0, 0.0);
+    }
+    emit_event(hwnd, 9, (int16_t)LOWORD(lparam), (int16_t)HIWORD(lparam), 0.0, 0.0);
+    return 0;
+  }
+  case WM_MOUSELEAVE:
+    if (tracked_mouse_window == hwnd) tracked_mouse_window = NULL;
+    emit_event(hwnd, 11, 0, 0, 0.0, 0.0);
+    return 0;
+  case WM_LBUTTONDOWN:
+  case WM_LBUTTONUP:
+  case WM_RBUTTONDOWN:
+  case WM_RBUTTONUP:
+  case WM_MBUTTONDOWN:
+  case WM_MBUTTONUP:
+  case WM_XBUTTONDOWN:
+  case WM_XBUTTONUP: {
+    int32_t button = 1;
+    if (message == WM_RBUTTONDOWN || message == WM_RBUTTONUP) button = 2;
+    else if (message == WM_MBUTTONDOWN || message == WM_MBUTTONUP) button = 3;
+    else if (message == WM_XBUTTONDOWN || message == WM_XBUTTONUP) button = HIWORD(wparam) == XBUTTON1 ? 4 : 5;
+    int32_t pressed = message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN ||
+        message == WM_MBUTTONDOWN || message == WM_XBUTTONDOWN;
+    emit_event(hwnd, 12, button, current_modifiers() | (pressed ? 16 : 0), 0.0, 0.0);
+    return 0;
+  }
+  case WM_MOUSEWHEEL:
+    emit_event(hwnd, 13, 0, current_modifiers(), 0.0, -(double)(int16_t)HIWORD(wparam) / WHEEL_DELTA);
+    return 0;
+  case WM_MOUSEHWHEEL:
+    emit_event(hwnd, 13, 0, current_modifiers(), (double)(int16_t)HIWORD(wparam) / WHEEL_DELTA, 0.0);
+    return 0;
   default:
     return DefWindowProcW(hwnd, message, wparam, lparam);
   }
