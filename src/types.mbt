@@ -29,8 +29,6 @@ pub fn validate_scale_factor(scale_factor : Double) -> Bool {
 }
 
 ///|
-/// Device-independent size. Convert explicitly with a valid scale factor
-/// before passing dimensions to a native window.
 pub(all) struct LogicalSize {
   width : Double
   height : Double
@@ -83,8 +81,6 @@ pub fn Size::to_logical(
 }
 
 ///|
-/// Physical desktop coordinate. Wayland compositors may ignore position
-/// requests.
 pub(all) struct Position {
   x : Int
   y : Int
@@ -96,14 +92,11 @@ pub fn Position::new(x~ : Int, y~ : Int) -> Position {
 }
 
 ///|
-/// A monitor identifier returned by a native display query. It remains valid
-/// only while the native display configuration has not changed.
 pub struct MonitorId {
   priv index_ : Int
 } derive(Eq, Debug)
 
 ///|
-/// Returns a monitor ID for a non-negative native display index.
 pub fn MonitorId::from_index(index : Int) -> MonitorId? {
   if index < 0 {
     None
@@ -113,15 +106,11 @@ pub fn MonitorId::from_index(index : Int) -> MonitorId? {
 }
 
 ///|
-/// Returns the native display index represented by this ID.
 pub fn MonitorId::index(self : MonitorId) -> Int {
   self.index_
 }
 
 ///|
-/// Monitor bounds in the native desktop coordinate system. These values are
-/// not interchangeable with physical client pixels on every backend; use
-/// `scale_factor` when converting for a specific platform.
 pub(all) struct Monitor {
   id : MonitorId
   x : Int
@@ -204,14 +193,12 @@ pub(all) enum ControlFlow {
 } derive(Eq, Debug)
 
 ///|
-/// State of a keyboard or pointer button.
 pub(all) enum InputState {
   Pressed
   Released
 } derive(Eq, Debug)
 
 ///|
-/// Cross-platform modifier state sampled with an input event.
 pub(all) struct Modifiers {
   shift : Bool
   control : Bool
@@ -229,10 +216,7 @@ pub fn Modifiers::new(
   { shift, control, alt, meta }
 }
 
-///| A platform-native keyboard code. Codes are intentionally not normalized
-
 ///|
-/// between Win32 and GTK; use `TextInput` for layout-aware text.
 pub(all) struct NativeKeyEvent {
   code : Int
   state : InputState
@@ -251,7 +235,6 @@ pub fn NativeKeyEvent::new(
 }
 
 ///|
-/// Pointer buttons normalized across Win32 and GTK.
 pub(all) enum MouseButton {
   Left
   Right
@@ -261,10 +244,7 @@ pub(all) enum MouseButton {
   Other(Int)
 } derive(Eq, Debug)
 
-///| Scroll values are backend-native smooth deltas when available, otherwise
-
 ///|
-/// unit line steps. Positive values move right and down.
 pub(all) struct ScrollDelta {
   x : Double
   y : Double
@@ -284,7 +264,6 @@ pub(all) enum WindowEvent {
   FocusChanged(Bool)
   RedrawRequested
   KeyInput(NativeKeyEvent)
-  /// A printable Unicode scalar. IME composition is not represented yet.
   TextInput(String)
   PointerMoved(Position)
   PointerEntered
@@ -327,4 +306,10 @@ pub(all) suberror WindowError {
   CreationFailed(String)
   MonitorUnavailable(MonitorId)
   Destroyed
+} derive(Debug)
+
+///|
+pub(all) suberror AppError {
+  StartupFailed(String)
+  RuntimeFailed(String)
 } derive(Debug)

@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "Nanaloveyuki/orby/core"
+package "Nanaloveyuki/orby"
 
 import {
   "moonbitlang/core/debug",
@@ -9,6 +9,11 @@ import {
 pub fn validate_scale_factor(Double) -> Bool
 
 // Errors
+pub(all) suberror AppError {
+  StartupFailed(String)
+  RuntimeFailed(String)
+} derive(@debug.Debug)
+
 pub(all) suberror GeometryError {
   InvalidScaleFactor(Double)
 } derive(@debug.Debug)
@@ -25,10 +30,28 @@ pub(all) suberror WindowError {
 } derive(@debug.Debug)
 
 // Types and methods
+pub struct ActiveApp {
+  // private fields
+} derive(@debug.Debug)
+pub fn ActiveApp::create_window(Self, WindowOptions) -> Window raise WindowError
+pub fn ActiveApp::exit(Self) -> Unit
+pub fn ActiveApp::exit_with_code(Self, Int) -> Unit
+pub fn ActiveApp::fail(Self, String) -> Unit
+pub fn ActiveApp::set_control_flow(Self, ControlFlow) -> Unit
+
 pub(all) enum ControlFlow {
   Poll
   Wait
 } derive(Eq, @debug.Debug)
+
+pub struct EventLoop {
+  // private fields
+} derive(@debug.Debug)
+pub fn EventLoop::available_monitors(Self) -> Array[Monitor]
+pub fn EventLoop::monitor(Self, MonitorId) -> Monitor?
+pub fn EventLoop::new() -> Self raise InitError
+pub fn EventLoop::primary_monitor(Self) -> Monitor?
+pub fn[A : App] EventLoop::run_app(Self, A) -> Int raise AppError
 
 pub(all) enum InputState {
   Pressed
@@ -106,6 +129,40 @@ pub(all) struct Size {
 pub fn Size::new(width~ : Int, height~ : Int) -> Self
 pub fn Size::to_logical(Self, Double) -> LogicalSize raise GeometryError
 
+pub struct WebViewHost {
+  // private fields
+} derive(@debug.Debug)
+pub fn WebViewHost::native_handle(Self) -> UInt64 raise WindowError
+
+pub struct Window {
+  // private fields
+} derive(@debug.Debug)
+pub fn Window::current_monitor(Self) -> Monitor? raise WindowError
+pub fn Window::destroy(Self) -> Unit
+pub fn Window::id(Self) -> WindowId
+pub fn Window::inner_size(Self) -> Size raise WindowError
+pub fn Window::is_destroyed(Self) -> Bool
+pub fn Window::is_fullscreen(Self) -> Bool raise WindowError
+pub fn Window::is_maximized(Self) -> Bool raise WindowError
+pub fn Window::is_minimized(Self) -> Bool raise WindowError
+pub fn Window::request_close(Self) -> Unit
+pub fn Window::request_redraw(Self) -> Unit
+pub fn Window::scale_factor(Self) -> Double raise WindowError
+pub fn Window::set_decorated(Self, Bool) -> Unit
+pub fn Window::set_fullscreen(Self, Bool) -> Unit
+pub fn Window::set_fullscreen_on(Self, MonitorId) -> Unit raise WindowError
+pub fn Window::set_inner_size(Self, Size) -> Unit
+pub fn Window::set_max_inner_size(Self, Size?) -> Unit
+pub fn Window::set_maximized(Self, Bool) -> Unit
+pub fn Window::set_min_inner_size(Self, Size?) -> Unit
+pub fn Window::set_minimized(Self, Bool) -> Unit
+pub fn Window::set_outer_position(Self, Position) -> Unit
+pub fn Window::set_resizable(Self, Bool) -> Unit
+pub fn Window::set_title(Self, String) -> Unit
+pub fn Window::set_visible(Self, Bool) -> Unit
+pub fn Window::webview_host(Self) -> WebViewHost raise WindowError
+pub impl Eq for Window
+
 pub(all) enum WindowEvent {
   CloseRequested
   Destroyed
@@ -139,4 +196,10 @@ pub fn WindowOptions::new(title? : String, size? : Size, visible? : Bool, resiza
 // Type aliases
 
 // Traits
+pub(open) trait App {
+  fn started(Self, ActiveApp) -> Unit raise AppError = _
+  fn window_event(Self, ActiveApp, WindowId, WindowEvent) -> Unit = _
+  fn about_to_wait(Self, ActiveApp) -> Unit = _
+  fn exiting(Self, ActiveApp) -> Unit = _
+}
 

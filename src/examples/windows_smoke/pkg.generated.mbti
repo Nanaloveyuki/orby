@@ -2,8 +2,7 @@
 package "Nanaloveyuki/orby/examples/windows_smoke"
 
 import {
-  "Nanaloveyuki/orby/core",
-  "Nanaloveyuki/orby/windows",
+  "Nanaloveyuki/orby",
 }
 
 // Values
@@ -12,7 +11,7 @@ import {
 
 // Types and methods
 type Smoke
-pub impl @windows.App for Smoke
+pub impl @orby.App for Smoke
 
 // Type aliases
 

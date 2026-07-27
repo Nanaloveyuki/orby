@@ -2,8 +2,7 @@
 package "Nanaloveyuki/orby/examples/moonview_linux"
 
 import {
-  "Nanaloveyuki/orby/core",
-  "Nanaloveyuki/orby/linux",
+  "Nanaloveyuki/orby",
 }
 
 // Values
@@ -12,8 +11,9 @@ import {
 
 // Types and methods
 type Smoke
-pub impl @linux.App for Smoke
+pub impl @orby.App for Smoke
 
 // Type aliases
 
 // Traits
+
