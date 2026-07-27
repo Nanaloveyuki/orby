@@ -1,6 +1,7 @@
 ///|
 struct Smoke {
   mut window : @linux.Window?
+  mut host : @linux.WebViewHost?
   mut view : @moonview.WebView?
   mut passed : Bool
 }
@@ -91,14 +92,16 @@ pub impl @linux.App for Smoke with fn started(self, app) {
   let window = try! app.create_window(
     @core.WindowOptions::new(title="Orby MoonView WebKitGTK smoke"),
   )
-  let host = window.webview_host().native_handle()
+  let host = try! window.webview_host()
+  let native_host = try! host.native_handle()
   self.window = Some(window)
+  self.host = Some(host)
   let options = @moonview.WebViewOptions::new(
     bounds=@moonview.Rect::new(x=0, y=0, width=800, height=600),
     initial_url="orby://app/index.html",
     on_event=event => self.handle_event(event),
   )
-  match @moonview.WebView::create(host, options) {
+  match @moonview.WebView::create(native_host, options) {
     Ok(view) => self.view = Some(view)
     Err(_error) => {
       println("orby moonview linux: create rejected")
@@ -126,7 +129,19 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
         None => ()
       }
     @core.WindowEvent::CloseRequested => self.destroy_host()
-    @core.WindowEvent::Destroyed => app.exit()
+    @core.WindowEvent::Destroyed => {
+      match self.host {
+        Some(host) =>
+          try host.native_handle() catch {
+            @core.WindowError::Destroyed => ()
+            _ => abort("orby moonview linux: unexpected stale-host error")
+          } noraise {
+            _ => abort("orby moonview linux: stale host remained usable")
+          }
+        None => abort("orby moonview linux: missing cached host")
+      }
+      app.exit()
+    }
     _ => ()
   }
 }
@@ -137,7 +152,7 @@ fn main raise {
     Ok(_) => ()
     Err(_error) => abort("orby moonview linux: scheme registration failed")
   }
-  let app = { window: None, view: None, passed: false }
+  let app = { window: None, host: None, view: None, passed: false }
   let event_loop = @linux.EventLoop::new()
   let code = event_loop.run_app(app)
   if code != 0 || !app.passed {

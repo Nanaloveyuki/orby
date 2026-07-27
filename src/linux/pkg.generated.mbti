@@ -30,8 +30,8 @@ pub fn[A : App] EventLoop::run_app(Self, A) -> Int
 
 pub struct WebViewHost {
   // private fields
-} derive(Eq, @debug.Debug)
-pub fn WebViewHost::native_handle(Self) -> UInt64
+} derive(@debug.Debug)
+pub fn WebViewHost::native_handle(Self) -> UInt64 raise @core.WindowError
 
 pub struct Window {
   // private fields
@@ -58,7 +58,7 @@ pub fn Window::set_outer_position(Self, @core.Position) -> Unit
 pub fn Window::set_resizable(Self, Bool) -> Unit
 pub fn Window::set_title(Self, String) -> Unit
 pub fn Window::set_visible(Self, Bool) -> Unit
-pub fn Window::webview_host(Self) -> WebViewHost
+pub fn Window::webview_host(Self) -> WebViewHost raise @core.WindowError
 pub impl Eq for Window
 
 // Type aliases

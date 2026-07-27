@@ -1,6 +1,7 @@
 ///|
 struct Smoke {
   mut window : @windows.Window?
+  mut host : @windows.WebViewHost?
   mut view : @moonview.WebView?
   mut passed : Bool
 }
@@ -91,8 +92,10 @@ pub impl @windows.App for Smoke with fn started(self, app) {
   let window = try! app.create_window(
     @core.WindowOptions::new(title="Orby MoonView WebView2 smoke"),
   )
-  let host = window.webview_host().native_handle()
+  let host = try! window.webview_host()
+  let native_host = try! host.native_handle()
   self.window = Some(window)
+  self.host = Some(host)
   let options = @moonview.WebViewOptions::new(
     bounds=@moonview.Rect::new(x=0, y=0, width=800, height=600),
     initial_url="orby://app/index.html",
@@ -103,7 +106,7 @@ pub impl @windows.App for Smoke with fn started(self, app) {
     ),
     on_event=event => self.handle_event(event),
   )
-  match @moonview.WebView::create(host, options) {
+  match @moonview.WebView::create(native_host, options) {
     Ok(view) => self.view = Some(view)
     Err(_error) => {
       println("orby moonview windows: create rejected")
@@ -131,7 +134,19 @@ pub impl @windows.App for Smoke with fn window_event(self, app, _id, event) {
         None => ()
       }
     @core.WindowEvent::CloseRequested => self.destroy_host()
-    @core.WindowEvent::Destroyed => app.exit()
+    @core.WindowEvent::Destroyed => {
+      match self.host {
+        Some(host) =>
+          try host.native_handle() catch {
+            @core.WindowError::Destroyed => ()
+            _ => abort("orby moonview windows: unexpected stale-host error")
+          } noraise {
+            _ => abort("orby moonview windows: stale host remained usable")
+          }
+        None => abort("orby moonview windows: missing cached host")
+      }
+      app.exit()
+    }
     _ => ()
   }
 }
@@ -142,7 +157,7 @@ fn main raise {
     Ok(_) => ()
     Err(_error) => abort("orby moonview windows: scheme registration failed")
   }
-  let app = { window: None, view: None, passed: false }
+  let app = { window: None, host: None, view: None, passed: false }
   let event_loop = @windows.EventLoop::new()
   let code = event_loop.run_app(app)
   if code != 0 || !app.passed {
