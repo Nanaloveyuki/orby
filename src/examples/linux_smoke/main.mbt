@@ -18,6 +18,13 @@ pub impl @linux.App for Smoke with fn started(self, app) {
   }
   window.set_inner_size(@core.Size::new(width=640, height=480))
   window.set_outer_position(@core.Position::new(x=40, y=40))
+  window.set_minimized(false)
+  window.set_maximized(false)
+  if (try! window.is_minimized()) || (try! window.is_maximized()) {
+    abort("Orby GTK smoke expected a restored window")
+  }
+  window.set_decorated(false)
+  window.set_decorated(true)
   window.set_visible(false)
   window.set_resizable(false)
   window.set_visible(true)

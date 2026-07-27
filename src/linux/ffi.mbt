@@ -29,6 +29,21 @@ extern "C" fn native_set_visible(host : UInt64, visible : Bool) -> Unit = "orby_
 extern "C" fn native_set_resizable(host : UInt64, resizable : Bool) -> Unit = "orby_gtk_set_resizable"
 
 ///|
+extern "C" fn native_set_minimized(host : UInt64, minimized : Bool) -> Unit = "orby_gtk_set_minimized"
+
+///|
+extern "C" fn native_is_minimized(host : UInt64) -> Bool = "orby_gtk_is_minimized"
+
+///|
+extern "C" fn native_set_maximized(host : UInt64, maximized : Bool) -> Unit = "orby_gtk_set_maximized"
+
+///|
+extern "C" fn native_is_maximized(host : UInt64) -> Bool = "orby_gtk_is_maximized"
+
+///|
+extern "C" fn native_set_decorated(host : UInt64, decorated : Bool) -> Unit = "orby_gtk_set_decorated"
+
+///|
 extern "C" fn native_set_inner_size(
   host : UInt64,
   width : Int,

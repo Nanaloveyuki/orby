@@ -65,6 +65,43 @@ pub fn Window::set_resizable(self : Window, resizable : Bool) -> Unit {
 }
 
 ///|
+pub fn Window::set_minimized(self : Window, minimized : Bool) -> Unit {
+  if self.alive.val {
+    native_set_minimized(self.fixed, minimized)
+  }
+}
+
+///|
+pub fn Window::is_minimized(self : Window) -> Bool raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  native_is_minimized(self.fixed)
+}
+
+///|
+pub fn Window::set_maximized(self : Window, maximized : Bool) -> Unit {
+  if self.alive.val {
+    native_set_maximized(self.fixed, maximized)
+  }
+}
+
+///|
+pub fn Window::is_maximized(self : Window) -> Bool raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  native_is_maximized(self.fixed)
+}
+
+///|
+pub fn Window::set_decorated(self : Window, decorated : Bool) -> Unit {
+  if self.alive.val {
+    native_set_decorated(self.fixed, decorated)
+  }
+}
+
+///|
 pub fn Window::inner_size(self : Window) -> @core.Size raise @core.WindowError {
   if !self.alive.val {
     raise @core.WindowError::Destroyed
