@@ -16,6 +16,8 @@ MoonView integration is validated after its Mooncakes package is available.
 event handler to accept it, or do nothing to cancel it. `request_close` uses
 the same path for programmatic closure. Destroying the final window ends the
 event loop automatically; `ActiveApp::exit_with_code` can set a process result.
+Calls on a destroyed `Window` are safe no-ops; use `is_destroyed` before
+retaining or reusing a window handle across lifecycle callbacks.
 
 ## Validation
 

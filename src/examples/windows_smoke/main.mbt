@@ -24,7 +24,23 @@ pub impl @windows.App for Smoke with fn window_event(self, app, _id, event) {
         Some(window) => window.destroy()
         None => ()
       }
-    @core.WindowEvent::Destroyed => app.exit_with_code(23)
+    @core.WindowEvent::Destroyed => {
+      match self.window {
+        Some(window) => {
+          if !window.is_destroyed() {
+            abort("Orby Win32 smoke expected a destroyed window")
+          }
+          window.destroy()
+          window.set_title("ignored after destruction")
+          window.set_visible(false)
+          window.set_resizable(true)
+          window.request_close()
+          window.request_redraw()
+        }
+        None => ()
+      }
+      app.exit_with_code(23)
+    }
     _ => ()
   }
 }
