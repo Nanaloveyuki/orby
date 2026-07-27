@@ -44,7 +44,9 @@ pub fn Window::request_redraw(Self) -> Unit
 pub fn Window::scale_factor(Self) -> Double raise @core.WindowError
 pub fn Window::set_decorated(Self, Bool) -> Unit
 pub fn Window::set_inner_size(Self, @core.Size) -> Unit
+pub fn Window::set_max_inner_size(Self, @core.Size?) -> Unit
 pub fn Window::set_maximized(Self, Bool) -> Unit
+pub fn Window::set_min_inner_size(Self, @core.Size?) -> Unit
 pub fn Window::set_minimized(Self, Bool) -> Unit
 pub fn Window::set_outer_position(Self, @core.Position) -> Unit
 pub fn Window::set_resizable(Self, Bool) -> Unit

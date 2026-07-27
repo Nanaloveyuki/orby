@@ -10,6 +10,13 @@ static int exit_requested = 0;
 static int32_t exit_code = 0;
 static int32_t window_count = 0;
 
+typedef struct {
+  int32_t min_width;
+  int32_t min_height;
+  int32_t max_width;
+  int32_t max_height;
+} OrbySizeConstraints;
+
 static int32_t window_id(GtkWidget *fixed) {
   return GPOINTER_TO_INT(g_object_get_data(G_OBJECT(fixed), "orby-window-id"));
 }
@@ -27,6 +34,39 @@ static void request_exit(int32_t code) {
 static GtkWidget *window_from_host(uint64_t host) {
   GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
   return fixed == NULL ? NULL : GTK_WIDGET(g_object_get_data(G_OBJECT(fixed), "orby-window"));
+}
+
+static OrbySizeConstraints *constraints_from_host(GtkWidget *fixed, int create) {
+  if (fixed == NULL) return NULL;
+  OrbySizeConstraints *constraints = g_object_get_data(G_OBJECT(fixed), "orby-size-constraints");
+  if (constraints == NULL && create) {
+    constraints = g_new0(OrbySizeConstraints, 1);
+    g_object_set_data_full(G_OBJECT(fixed), "orby-size-constraints", constraints, g_free);
+  }
+  return constraints;
+}
+
+static int32_t constrained_dimension(int32_t value, int32_t minimum, int32_t maximum) {
+  if (value < 1) value = 1;
+  if (minimum > 0 && value < minimum) value = minimum;
+  if (maximum > 0 && value > maximum) value = maximum;
+  return value;
+}
+
+static void apply_size_constraints(GtkWidget *window, OrbySizeConstraints *constraints) {
+  GdkGeometry geometry = { 0 };
+  GdkWindowHints hints = 0;
+  if (constraints->min_width > 0 || constraints->min_height > 0) {
+    geometry.min_width = constraints->min_width > 0 ? constraints->min_width : 1;
+    geometry.min_height = constraints->min_height > 0 ? constraints->min_height : 1;
+    hints |= GDK_HINT_MIN_SIZE;
+  }
+  if (constraints->max_width > 0 || constraints->max_height > 0) {
+    geometry.max_width = constraints->max_width > 0 ? constraints->max_width : G_MAXINT;
+    geometry.max_height = constraints->max_height > 0 ? constraints->max_height : G_MAXINT;
+    hints |= GDK_HINT_MAX_SIZE;
+  }
+  gtk_window_set_geometry_hints(GTK_WINDOW(window), NULL, &geometry, hints);
 }
 
 static int32_t modifier_bits(GdkModifierType state) {
@@ -197,9 +237,35 @@ MOONBIT_FFI_EXPORT void orby_gtk_set_decorated(uint64_t host, int32_t decorated)
   GtkWidget *window = window_from_host(host);
   if (window != NULL) gtk_window_set_decorated(GTK_WINDOW(window), decorated != 0);
 }
-MOONBIT_FFI_EXPORT void orby_gtk_set_inner_size(uint64_t host, int32_t width, int32_t height) {
+MOONBIT_FFI_EXPORT void orby_gtk_set_min_inner_size(uint64_t host, int32_t width, int32_t height) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
   GtkWidget *window = window_from_host(host);
-  if (window != NULL) gtk_window_resize(GTK_WINDOW(window), width > 0 ? width : 1, height > 0 ? height : 1);
+  OrbySizeConstraints *constraints = constraints_from_host(fixed, 1);
+  if (window == NULL || constraints == NULL) return;
+  constraints->min_width = width > 0 ? width : 0;
+  constraints->min_height = height > 0 ? height : 0;
+  if (constraints->max_width > 0 && constraints->min_width > constraints->max_width) constraints->max_width = constraints->min_width;
+  if (constraints->max_height > 0 && constraints->min_height > constraints->max_height) constraints->max_height = constraints->min_height;
+  apply_size_constraints(window, constraints);
+}
+MOONBIT_FFI_EXPORT void orby_gtk_set_max_inner_size(uint64_t host, int32_t width, int32_t height) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
+  GtkWidget *window = window_from_host(host);
+  OrbySizeConstraints *constraints = constraints_from_host(fixed, 1);
+  if (window == NULL || constraints == NULL) return;
+  constraints->max_width = width > 0 ? width : 0;
+  constraints->max_height = height > 0 ? height : 0;
+  if (constraints->max_width > 0 && constraints->min_width > constraints->max_width) constraints->min_width = constraints->max_width;
+  if (constraints->max_height > 0 && constraints->min_height > constraints->max_height) constraints->min_height = constraints->max_height;
+  apply_size_constraints(window, constraints);
+}
+MOONBIT_FFI_EXPORT void orby_gtk_set_inner_size(uint64_t host, int32_t width, int32_t height) {
+  GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
+  GtkWidget *window = window_from_host(host);
+  OrbySizeConstraints *constraints = constraints_from_host(fixed, 0);
+  if (window != NULL) gtk_window_resize(GTK_WINDOW(window),
+      constrained_dimension(width, constraints == NULL ? 0 : constraints->min_width, constraints == NULL ? 0 : constraints->max_width),
+      constrained_dimension(height, constraints == NULL ? 0 : constraints->min_height, constraints == NULL ? 0 : constraints->max_height));
 }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_inner_width(uint64_t host) {
   GtkWidget *fixed = (GtkWidget *)(uintptr_t)host;
@@ -258,6 +324,8 @@ MOONBIT_FFI_EXPORT int32_t orby_gtk_is_minimized(uint64_t h) { (void)h; return 0
 MOONBIT_FFI_EXPORT void orby_gtk_set_maximized(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_is_maximized(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_decorated(uint64_t h, int32_t v) { (void)h; (void)v; }
+MOONBIT_FFI_EXPORT void orby_gtk_set_min_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
+MOONBIT_FFI_EXPORT void orby_gtk_set_max_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_inner_width(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_inner_height(uint64_t h) { (void)h; return 0; }

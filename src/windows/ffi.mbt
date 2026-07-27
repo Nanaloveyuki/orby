@@ -44,6 +44,20 @@ extern "C" fn native_is_maximized(hwnd : UInt64) -> Bool = "orby_win_is_maximize
 extern "C" fn native_set_decorated(hwnd : UInt64, decorated : Bool) -> Unit = "orby_win_set_decorated"
 
 ///|
+extern "C" fn native_set_min_inner_size(
+  hwnd : UInt64,
+  width : Int,
+  height : Int,
+) -> Unit = "orby_win_set_min_inner_size"
+
+///|
+extern "C" fn native_set_max_inner_size(
+  hwnd : UInt64,
+  width : Int,
+  height : Int,
+) -> Unit = "orby_win_set_max_inner_size"
+
+///|
 extern "C" fn native_set_inner_size(
   hwnd : UInt64,
   width : Int,

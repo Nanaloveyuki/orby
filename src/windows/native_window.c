@@ -16,12 +16,80 @@ static int exit_requested = 0;
 static HWND tracked_mouse_window = NULL;
 static uint16_t pending_high_surrogate = 0;
 
+typedef struct OrbySizeConstraints {
+  HWND hwnd;
+  int32_t min_width;
+  int32_t min_height;
+  int32_t max_width;
+  int32_t max_height;
+  struct OrbySizeConstraints *next;
+} OrbySizeConstraints;
+
+static OrbySizeConstraints *size_constraints = NULL;
+
 static void client_to_outer_rect(DWORD style, DWORD ex_style, int32_t width, int32_t height, RECT *rect) {
   rect->left = 0;
   rect->top = 0;
   rect->right = width > 0 ? width : 1;
   rect->bottom = height > 0 ? height : 1;
   AdjustWindowRectEx(rect, style, FALSE, ex_style);
+}
+
+static OrbySizeConstraints *constraints_for(HWND hwnd, int create) {
+  OrbySizeConstraints *current = size_constraints;
+  while (current != NULL) {
+    if (current->hwnd == hwnd) return current;
+    current = current->next;
+  }
+  if (!create) return NULL;
+  current = (OrbySizeConstraints *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*current));
+  if (current == NULL) return NULL;
+  current->hwnd = hwnd;
+  current->next = size_constraints;
+  size_constraints = current;
+  return current;
+}
+
+static void remove_constraints(HWND hwnd) {
+  OrbySizeConstraints **current = &size_constraints;
+  while (*current != NULL) {
+    if ((*current)->hwnd == hwnd) {
+      OrbySizeConstraints *removed = *current;
+      *current = removed->next;
+      HeapFree(GetProcessHeap(), 0, removed);
+      return;
+    }
+    current = &(*current)->next;
+  }
+}
+
+static int32_t constrained_dimension(int32_t value, int32_t minimum, int32_t maximum) {
+  if (value < 1) value = 1;
+  if (minimum > 0 && value < minimum) value = minimum;
+  if (maximum > 0 && value > maximum) value = maximum;
+  return value;
+}
+
+static void apply_size_constraints(HWND hwnd, MINMAXINFO *info) {
+  OrbySizeConstraints *constraints = constraints_for(hwnd, 0);
+  if (constraints == NULL) return;
+  DWORD style = (DWORD)GetWindowLongPtrW(hwnd, GWL_STYLE);
+  DWORD ex_style = (DWORD)GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+  RECT rect;
+  if (constraints->min_width > 0 || constraints->min_height > 0) {
+    client_to_outer_rect(style, ex_style,
+        constraints->min_width > 0 ? constraints->min_width : 1,
+        constraints->min_height > 0 ? constraints->min_height : 1, &rect);
+    if (constraints->min_width > 0) info->ptMinTrackSize.x = rect.right - rect.left;
+    if (constraints->min_height > 0) info->ptMinTrackSize.y = rect.bottom - rect.top;
+  }
+  if (constraints->max_width > 0 || constraints->max_height > 0) {
+    client_to_outer_rect(style, ex_style,
+        constraints->max_width > 0 ? constraints->max_width : 1,
+        constraints->max_height > 0 ? constraints->max_height : 1, &rect);
+    if (constraints->max_width > 0) info->ptMaxTrackSize.x = rect.right - rect.left;
+    if (constraints->max_height > 0) info->ptMaxTrackSize.y = rect.bottom - rect.top;
+  }
 }
 
 static void emit_event(HWND hwnd, int32_t kind, int32_t arg0, int32_t arg1, double argd0, double argd1) {
@@ -62,6 +130,9 @@ static void emit_utf16_text(HWND hwnd, uint16_t unit) {
 
 static LRESULT CALLBACK orby_wndproc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
   switch (message) {
+  case WM_GETMINMAXINFO:
+    apply_size_constraints(hwnd, (MINMAXINFO *)lparam);
+    return 0;
   case WM_CLOSE:
     emit_event(hwnd, 1, 0, 0, 0.0, 0.0);
     return 0;
@@ -71,6 +142,9 @@ static LRESULT CALLBACK orby_wndproc(HWND hwnd, UINT message, WPARAM wparam, LPA
     emit_event(hwnd, 2, 0, 0, 0.0, 0.0);
     if (window_count == 0 && !exit_requested) PostQuitMessage(0);
     return 0;
+  case WM_NCDESTROY:
+    remove_constraints(hwnd);
+    return DefWindowProcW(hwnd, message, wparam, lparam);
   case WM_SIZE:
     emit_event(hwnd, 3, LOWORD(lparam), HIWORD(lparam), 0.0, 0.0);
     return 0;
@@ -228,8 +302,31 @@ MOONBIT_FFI_EXPORT void orby_win_set_decorated(uint64_t hwnd, int32_t decorated)
   SetWindowLongPtrW(window, GWL_STYLE, style);
   SetWindowPos(window, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 }
+MOONBIT_FFI_EXPORT void orby_win_set_min_inner_size(uint64_t hwnd, int32_t width, int32_t height) {
+  OrbySizeConstraints *constraints = constraints_for((HWND)(uintptr_t)hwnd, 1);
+  if (constraints == NULL) return;
+  constraints->min_width = width > 0 ? width : 0;
+  constraints->min_height = height > 0 ? height : 0;
+  if (constraints->max_width > 0 && constraints->min_width > constraints->max_width) constraints->max_width = constraints->min_width;
+  if (constraints->max_height > 0 && constraints->min_height > constraints->max_height) constraints->max_height = constraints->min_height;
+}
+MOONBIT_FFI_EXPORT void orby_win_set_max_inner_size(uint64_t hwnd, int32_t width, int32_t height) {
+  OrbySizeConstraints *constraints = constraints_for((HWND)(uintptr_t)hwnd, 1);
+  if (constraints == NULL) return;
+  constraints->max_width = width > 0 ? width : 0;
+  constraints->max_height = height > 0 ? height : 0;
+  if (constraints->max_width > 0 && constraints->min_width > constraints->max_width) constraints->min_width = constraints->max_width;
+  if (constraints->max_height > 0 && constraints->min_height > constraints->max_height) constraints->min_height = constraints->max_height;
+}
 MOONBIT_FFI_EXPORT void orby_win_set_inner_size(uint64_t hwnd, int32_t width, int32_t height) {
   HWND window = (HWND)(uintptr_t)hwnd;
+  OrbySizeConstraints *constraints = constraints_for(window, 0);
+  width = constrained_dimension(width,
+      constraints == NULL ? 0 : constraints->min_width,
+      constraints == NULL ? 0 : constraints->max_width);
+  height = constrained_dimension(height,
+      constraints == NULL ? 0 : constraints->min_height,
+      constraints == NULL ? 0 : constraints->max_height);
   RECT rect;
   client_to_outer_rect(
       (DWORD)GetWindowLongPtrW(window, GWL_STYLE),
@@ -292,6 +389,8 @@ MOONBIT_FFI_EXPORT int32_t orby_win_is_minimized(uint64_t h) { (void)h; return 0
 MOONBIT_FFI_EXPORT void orby_win_set_maximized(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT int32_t orby_win_is_maximized(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT void orby_win_set_decorated(uint64_t h, int32_t v) { (void)h; (void)v; }
+MOONBIT_FFI_EXPORT void orby_win_set_min_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
+MOONBIT_FFI_EXPORT void orby_win_set_max_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT void orby_win_set_inner_size(uint64_t h, int32_t w, int32_t t) { (void)h; (void)w; (void)t; }
 MOONBIT_FFI_EXPORT int32_t orby_win_inner_width(uint64_t h) { (void)h; return 0; }
 MOONBIT_FFI_EXPORT int32_t orby_win_inner_height(uint64_t h) { (void)h; return 0; }
