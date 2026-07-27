@@ -36,6 +36,33 @@ pub fn Window::is_destroyed(self : Window) -> Bool {
 }
 
 ///|
+/// Returns the monitor nearest to this window, if one is available.
+pub fn Window::current_monitor(
+  self : Window,
+) -> @core.Monitor? raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  if !native_has_current_monitor(self.hwnd) {
+    None
+  } else {
+    Some(
+      @core.Monitor::new(
+        x=native_current_monitor_metric(self.hwnd, 0),
+        y=native_current_monitor_metric(self.hwnd, 1),
+        width=native_current_monitor_metric(self.hwnd, 2),
+        height=native_current_monitor_metric(self.hwnd, 3),
+        work_x=native_current_monitor_metric(self.hwnd, 4),
+        work_y=native_current_monitor_metric(self.hwnd, 5),
+        work_width=native_current_monitor_metric(self.hwnd, 6),
+        work_height=native_current_monitor_metric(self.hwnd, 7),
+        scale_factor=native_current_monitor_scale(self.hwnd),
+      ),
+    )
+  }
+}
+
+///|
 pub fn Window::destroy(self : Window) -> Unit {
   if self.alive.val {
     self.alive.val = false

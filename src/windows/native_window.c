@@ -41,6 +41,34 @@ static void client_to_outer_rect(DWORD style, DWORD ex_style, int32_t width, int
   AdjustWindowRectEx(rect, style, FALSE, ex_style);
 }
 
+static HMONITOR primary_monitor(void) {
+  POINT origin = { 0, 0 };
+  return MonitorFromPoint(origin, MONITOR_DEFAULTTOPRIMARY);
+}
+
+static int32_t monitor_metric(HMONITOR monitor, int32_t metric) {
+  MONITORINFO info = { sizeof(info) };
+  if (monitor == NULL || !GetMonitorInfoW(monitor, &info)) return 0;
+  RECT rect = metric < 4 ? info.rcMonitor : info.rcWork;
+  switch (metric % 4) {
+  case 0: return rect.left;
+  case 1: return rect.top;
+  case 2: return rect.right - rect.left;
+  default: return rect.bottom - rect.top;
+  }
+}
+
+static double monitor_scale(HMONITOR monitor) {
+  typedef HRESULT (WINAPI *get_dpi_for_monitor_fn)(HMONITOR, int, UINT *, UINT *);
+  HMODULE shcore = LoadLibraryW(L"shcore.dll");
+  get_dpi_for_monitor_fn get_dpi = shcore == NULL ? NULL :
+      (get_dpi_for_monitor_fn)GetProcAddress(shcore, "GetDpiForMonitor");
+  UINT dpi_x = 0, dpi_y = 0;
+  HRESULT result = get_dpi == NULL ? E_FAIL : get_dpi(monitor, 0, &dpi_x, &dpi_y);
+  if (shcore != NULL) FreeLibrary(shcore);
+  return SUCCEEDED(result) && dpi_x != 0 ? (double)dpi_x / 96.0 : (double)GetDpiForSystem() / 96.0;
+}
+
 static OrbySizeConstraints *constraints_for(HWND hwnd, int create) {
   OrbySizeConstraints *current = size_constraints;
   while (current != NULL) {
@@ -402,6 +430,20 @@ MOONBIT_FFI_EXPORT void orby_win_exit(int32_t code) {
   PostQuitMessage(code);
 }
 MOONBIT_FFI_EXPORT void orby_win_set_control_flow(int32_t poll) { poll_mode = poll != 0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_has_primary_monitor(void) { return primary_monitor() != NULL; }
+MOONBIT_FFI_EXPORT int32_t orby_win_primary_monitor_metric(int32_t metric) { return monitor_metric(primary_monitor(), metric); }
+MOONBIT_FFI_EXPORT double orby_win_primary_monitor_scale(void) { return monitor_scale(primary_monitor()); }
+MOONBIT_FFI_EXPORT int32_t orby_win_has_current_monitor(uint64_t hwnd) {
+  return MonitorFromWindow((HWND)(uintptr_t)hwnd, MONITOR_DEFAULTTONULL) != NULL;
+}
+MOONBIT_FFI_EXPORT int32_t orby_win_current_monitor_metric(uint64_t hwnd, int32_t metric) {
+  return monitor_metric(MonitorFromWindow((HWND)(uintptr_t)hwnd, MONITOR_DEFAULTTONULL), metric);
+}
+MOONBIT_FFI_EXPORT double orby_win_current_monitor_scale(uint64_t hwnd) {
+  HWND window = (HWND)(uintptr_t)hwnd;
+  UINT dpi = GetDpiForWindow(window);
+  return dpi == 0 ? monitor_scale(MonitorFromWindow(window, MONITOR_DEFAULTTONULL)) : (double)dpi / 96.0;
+}
 MOONBIT_FFI_EXPORT void orby_win_set_event_callback(orby_event_callback callback, void *context) {
   if (event_context != NULL) moonbit_decref(event_context);
   event_callback = callback;
@@ -478,6 +520,12 @@ MOONBIT_FFI_EXPORT void orby_win_set_outer_position(uint64_t h, int32_t x, int32
 MOONBIT_FFI_EXPORT void orby_win_request_close(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_exit(int32_t c) { (void)c; }
 MOONBIT_FFI_EXPORT void orby_win_set_control_flow(int32_t p) { (void)p; }
+MOONBIT_FFI_EXPORT int32_t orby_win_has_primary_monitor(void) { return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_primary_monitor_metric(int32_t m) { (void)m; return 0; }
+MOONBIT_FFI_EXPORT double orby_win_primary_monitor_scale(void) { return 1.0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_has_current_monitor(uint64_t h) { (void)h; return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_current_monitor_metric(uint64_t h, int32_t m) { (void)h; (void)m; return 0; }
+MOONBIT_FFI_EXPORT double orby_win_current_monitor_scale(uint64_t h) { (void)h; return 1.0; }
 MOONBIT_FFI_EXPORT void orby_win_set_event_callback(void *c, void *p) { (void)c; (void)p; }
 MOONBIT_FFI_EXPORT int32_t orby_win_run(void) { return 1; }
 #endif

@@ -11,6 +11,13 @@ pub impl @linux.App for Smoke with fn started(self, app) {
     @core.WindowOptions::new(title="Orby GTK smoke", visible=true),
   )
   self.window = Some(window)
+  match (try! window.current_monitor()) {
+    Some(monitor) =>
+      if monitor.width < 1 || monitor.height < 1 || monitor.scale_factor <= 0.0 {
+        abort("Orby GTK smoke expected a valid current monitor")
+      }
+    None => abort("Orby GTK smoke expected a current monitor")
+  }
   let initial_size = try! window.inner_size()
   if initial_size != @core.Size::new(width=800, height=600) {
     abort("Orby GTK smoke expected an 800x600 client area")
@@ -92,6 +99,13 @@ pub impl @linux.App for Smoke with fn about_to_wait(self, app) {
 ///|
 fn main {
   let event_loop = try! @linux.EventLoop::new()
+  match event_loop.primary_monitor() {
+    Some(monitor) =>
+      if monitor.width < 1 || monitor.height < 1 || monitor.scale_factor <= 0.0 {
+        abort("Orby GTK smoke expected a valid primary monitor")
+      }
+    None => ()
+  }
   let app = { window: None, control_flow_switched: false }
   let code = event_loop.run_app(app)
   if code != 23 {

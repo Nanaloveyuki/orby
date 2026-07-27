@@ -96,6 +96,24 @@ extern "C" fn native_exit(code : Int) -> Unit = "orby_win_exit"
 extern "C" fn native_set_control_flow(poll : Bool) -> Unit = "orby_win_set_control_flow"
 
 ///|
+extern "C" fn native_has_primary_monitor() -> Bool = "orby_win_has_primary_monitor"
+
+///|
+extern "C" fn native_primary_monitor_metric(metric : Int) -> Int = "orby_win_primary_monitor_metric"
+
+///|
+extern "C" fn native_primary_monitor_scale() -> Double = "orby_win_primary_monitor_scale"
+
+///|
+extern "C" fn native_has_current_monitor(hwnd : UInt64) -> Bool = "orby_win_has_current_monitor"
+
+///|
+extern "C" fn native_current_monitor_metric(hwnd : UInt64, metric : Int) -> Int = "orby_win_current_monitor_metric"
+
+///|
+extern "C" fn native_current_monitor_scale(hwnd : UInt64) -> Double = "orby_win_current_monitor_scale"
+
+///|
 #borrow(call_closure)
 #owned(callback)
 extern "C" fn native_set_event_callback(

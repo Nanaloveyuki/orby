@@ -29,3 +29,22 @@ test "logical size converts through a scale factor" {
 test "physical positions preserve negative desktop coordinates" {
   debug_inspect(Position::new(x=-120, y=48), content="{ x: -120, y: 48 }")
 }
+
+///|
+test "monitor normalizes unusable native metrics" {
+  let monitor = Monitor::new(
+    x=-12,
+    y=8,
+    width=0,
+    height=-1,
+    work_x=-12,
+    work_y=8,
+    work_width=0,
+    work_height=-1,
+    scale_factor=0.0,
+  )
+  debug_inspect(
+    monitor,
+    content="{\n  x: -12,\n  y: 8,\n  width: 1,\n  height: 1,\n  work_x: -12,\n  work_y: 8,\n  work_width: 1,\n  work_height: 1,\n  scale_factor: 1,\n}",
+  )
+}
