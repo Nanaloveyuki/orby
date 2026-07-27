@@ -102,6 +102,24 @@ pub fn Window::set_decorated(self : Window, decorated : Bool) -> Unit {
 }
 
 ///|
+/// Requests fullscreen on the native monitor chosen for this window. GTK
+/// compositors may apply the request asynchronously.
+pub fn Window::set_fullscreen(self : Window, fullscreen : Bool) -> Unit {
+  if self.alive.val {
+    native_set_fullscreen(self.fixed, fullscreen)
+  }
+}
+
+///|
+/// Returns the fullscreen state currently reported by GDK.
+pub fn Window::is_fullscreen(self : Window) -> Bool raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  native_is_fullscreen(self.fixed)
+}
+
+///|
 /// Sets the physical client-area minimum size. Pass `None` to remove it. If it
 /// exceeds the current maximum on an axis, that maximum is raised to match.
 pub fn Window::set_min_inner_size(self : Window, size : @core.Size?) -> Unit {
