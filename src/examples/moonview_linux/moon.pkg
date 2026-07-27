@@ -1,8 +1,7 @@
 import {
   "moonbitlang/core/encoding/utf8",
   "Nanaloveyuki/moonview",
-  "Nanaloveyuki/orby/core",
-  "Nanaloveyuki/orby/linux",
+  "Nanaloveyuki/orby",
 }
 
 supported_targets = "native"

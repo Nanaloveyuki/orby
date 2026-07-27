@@ -1,14 +1,14 @@
 ///|
 struct Smoke {
-  mut window : @linux.Window?
+  mut window : @orby.Window?
   mut control_flow_switched : Bool
 }
 
 ///|
-pub impl @linux.App for Smoke with fn started(self, app) {
-  app.set_control_flow(@core.ControlFlow::Poll)
+pub impl @orby.App for Smoke with fn started(self, app) {
+  app.set_control_flow(@orby.ControlFlow::Poll)
   let window = try! app.create_window(
-    @core.WindowOptions::new(title="Orby GTK smoke", visible=true),
+    @orby.WindowOptions::new(title="Orby GTK smoke", visible=true),
   )
   self.window = Some(window)
   match (try! window.current_monitor()) {
@@ -19,20 +19,20 @@ pub impl @linux.App for Smoke with fn started(self, app) {
     None => abort("Orby GTK smoke expected a current monitor")
   }
   let initial_size = try! window.inner_size()
-  if initial_size != @core.Size::new(width=800, height=600) {
+  if initial_size != @orby.Size::new(width=800, height=600) {
     abort("Orby GTK smoke expected an 800x600 client area")
   }
   if (try! window.scale_factor()) <= 0.0 {
     abort("Orby GTK smoke expected a positive scale factor")
   }
-  window.set_inner_size(@core.Size::new(width=640, height=480))
-  window.set_min_inner_size(Some(@core.Size::new(width=400, height=300)))
-  window.set_max_inner_size(Some(@core.Size::new(width=640, height=480)))
-  window.set_inner_size(@core.Size::new(width=1, height=1))
-  window.set_inner_size(@core.Size::new(width=2000, height=2000))
+  window.set_inner_size(@orby.Size::new(width=640, height=480))
+  window.set_min_inner_size(Some(@orby.Size::new(width=400, height=300)))
+  window.set_max_inner_size(Some(@orby.Size::new(width=640, height=480)))
+  window.set_inner_size(@orby.Size::new(width=1, height=1))
+  window.set_inner_size(@orby.Size::new(width=2000, height=2000))
   window.set_min_inner_size(None)
   window.set_max_inner_size(None)
-  window.set_outer_position(@core.Position::new(x=40, y=40))
+  window.set_outer_position(@orby.Position::new(x=40, y=40))
   window.set_minimized(false)
   window.set_maximized(false)
   if (try! window.is_minimized()) || (try! window.is_maximized()) {
@@ -51,14 +51,14 @@ pub impl @linux.App for Smoke with fn started(self, app) {
 }
 
 ///|
-pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
+pub impl @orby.App for Smoke with fn window_event(self, app, _id, event) {
   match event {
-    @core.WindowEvent::CloseRequested =>
+    @orby.WindowEvent::CloseRequested =>
       match self.window {
         Some(window) => window.destroy()
         None => ()
       }
-    @core.WindowEvent::Destroyed => {
+    @orby.WindowEvent::Destroyed => {
       if !self.control_flow_switched {
         abort("Orby GTK smoke expected a control-flow callback")
       }
@@ -71,8 +71,8 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
           window.set_title("ignored after destruction")
           window.set_visible(false)
           window.set_resizable(true)
-          window.set_inner_size(@core.Size::new(width=320, height=240))
-          window.set_outer_position(@core.Position::new(x=0, y=0))
+          window.set_inner_size(@orby.Size::new(width=320, height=240))
+          window.set_outer_position(@orby.Position::new(x=0, y=0))
           window.request_close()
           window.request_redraw()
         }
@@ -85,10 +85,10 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
 }
 
 ///|
-pub impl @linux.App for Smoke with fn about_to_wait(self, app) {
+pub impl @orby.App for Smoke with fn about_to_wait(self, app) {
   if !self.control_flow_switched {
     self.control_flow_switched = true
-    app.set_control_flow(@core.ControlFlow::Wait)
+    app.set_control_flow(@orby.ControlFlow::Wait)
     match self.window {
       Some(window) => window.request_close()
       None => ()
@@ -98,7 +98,7 @@ pub impl @linux.App for Smoke with fn about_to_wait(self, app) {
 
 ///|
 fn main raise {
-  let event_loop = @linux.EventLoop::new()
+  let event_loop = @orby.EventLoop::new()
   let monitors = event_loop.available_monitors()
   for monitor in monitors {
     match event_loop.monitor(monitor.id) {

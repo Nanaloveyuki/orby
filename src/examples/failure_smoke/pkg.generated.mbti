@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "Nanaloveyuki/orby/examples/moonview_windows"
+package "Nanaloveyuki/orby/examples/failure_smoke"
 
 import {
   "Nanaloveyuki/orby",
@@ -10,8 +10,10 @@ import {
 // Errors
 
 // Types and methods
-type Smoke
-pub impl @orby.App for Smoke
+type FailureApp
+pub impl @orby.App for FailureApp
+
+type FailureMode
 
 // Type aliases
 

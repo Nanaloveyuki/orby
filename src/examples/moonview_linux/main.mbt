@@ -1,8 +1,9 @@
 ///|
 struct Smoke {
-  mut window : @linux.Window?
-  mut host : @linux.WebViewHost?
+  mut window : @orby.Window?
+  mut host : @orby.WebViewHost?
   mut view : @moonview.WebView?
+  mut active : @orby.ActiveApp?
   mut passed : Bool
 }
 
@@ -78,19 +79,30 @@ fn Smoke::handle_event(self : Smoke, event : @moonview.WebViewEvent) -> Unit {
     @moonview.WebViewEvent::CreationFailed(_error) => {
       println("orby moonview linux: creation failed")
       self.destroy_host()
+      self.fail_runtime("MoonView creation failed")
     }
     @moonview.WebViewEvent::ScriptFailed(request_id, _error) => {
       println("orby moonview linux: script failed \{request_id}")
       self.destroy_host()
+      self.fail_runtime("MoonView script execution failed")
     }
     _ => ()
   }
 }
 
 ///|
-pub impl @linux.App for Smoke with fn started(self, app) {
+fn Smoke::fail_runtime(self : Smoke, reason : String) -> Unit {
+  match self.active {
+    Some(app) => app.fail(reason)
+    None => ()
+  }
+}
+
+///|
+pub impl @orby.App for Smoke with fn started(self, app) {
+  self.active = Some(app)
   let window = try! app.create_window(
-    @core.WindowOptions::new(title="Orby MoonView WebKitGTK smoke"),
+    @orby.WindowOptions::new(title="Orby MoonView WebKitGTK smoke"),
   )
   let host = try! window.webview_host()
   let native_host = try! host.native_handle()
@@ -106,14 +118,15 @@ pub impl @linux.App for Smoke with fn started(self, app) {
     Err(_error) => {
       println("orby moonview linux: create rejected")
       self.destroy_host()
+      raise @orby.AppError::StartupFailed("MoonView creation was rejected")
     }
   }
 }
 
 ///|
-pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
+pub impl @orby.App for Smoke with fn window_event(self, app, _id, event) {
   match event {
-    @core.WindowEvent::Resized(size) =>
+    @orby.WindowEvent::Resized(size) =>
       match self.view {
         Some(view) =>
           ignore(
@@ -128,12 +141,12 @@ pub impl @linux.App for Smoke with fn window_event(self, app, _id, event) {
           )
         None => ()
       }
-    @core.WindowEvent::CloseRequested => self.destroy_host()
-    @core.WindowEvent::Destroyed => {
+    @orby.WindowEvent::CloseRequested => self.destroy_host()
+    @orby.WindowEvent::Destroyed => {
       match self.host {
         Some(host) =>
           try host.native_handle() catch {
-            @core.WindowError::Destroyed => ()
+            @orby.WindowError::Destroyed => ()
             _ => abort("orby moonview linux: unexpected stale-host error")
           } noraise {
             _ => abort("orby moonview linux: stale host remained usable")
@@ -152,8 +165,14 @@ fn main raise {
     Ok(_) => ()
     Err(_error) => abort("orby moonview linux: scheme registration failed")
   }
-  let app = { window: None, host: None, view: None, passed: false }
-  let event_loop = @linux.EventLoop::new()
+  let app = {
+    window: None,
+    host: None,
+    view: None,
+    active: None,
+    passed: false,
+  }
+  let event_loop = @orby.EventLoop::new()
   let code = event_loop.run_app(app)
   if code != 0 || !app.passed {
     abort("orby moonview linux: smoke failed")

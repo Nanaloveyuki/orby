@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/core/encoding/utf8",
+  "Nanaloveyuki/orby/linux",
+  "Nanaloveyuki/orby/windows",
+}
+
+supported_targets = "native"
