@@ -20,6 +20,7 @@ pub impl @linux.App for Smoke with fn started(self, app) {
   window.set_inner_size(@core.Size::new(width=640, height=480))
   window.set_min_inner_size(Some(@core.Size::new(width=400, height=300)))
   window.set_max_inner_size(Some(@core.Size::new(width=640, height=480)))
+  window.request_redraw()
 }
 
 ///|
