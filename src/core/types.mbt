@@ -58,9 +58,9 @@ pub fn LogicalSize::new(width~ : Double, height~ : Double) -> LogicalSize {
 pub fn LogicalSize::to_physical(
   self : LogicalSize,
   scale_factor : Double,
-) -> Size {
+) -> Size raise GeometryError {
   guard validate_scale_factor(scale_factor) else {
-    abort("scale_factor must be finite and positive")
+    raise GeometryError::InvalidScaleFactor(scale_factor)
   }
   Size::new(
     width=(self.width * scale_factor).to_int(),
@@ -69,9 +69,12 @@ pub fn LogicalSize::to_physical(
 }
 
 ///|
-pub fn Size::to_logical(self : Size, scale_factor : Double) -> LogicalSize {
+pub fn Size::to_logical(
+  self : Size,
+  scale_factor : Double,
+) -> LogicalSize raise GeometryError {
   guard validate_scale_factor(scale_factor) else {
-    abort("scale_factor must be finite and positive")
+    raise GeometryError::InvalidScaleFactor(scale_factor)
   }
   LogicalSize::new(
     width=self.width.to_double() / scale_factor,
@@ -307,6 +310,11 @@ pub fn WindowOptions::new(
 ) -> WindowOptions {
   { title, size, visible, resizable }
 }
+
+///|
+pub(all) suberror GeometryError {
+  InvalidScaleFactor(Double)
+} derive(Debug)
 
 ///|
 pub(all) suberror InitError {

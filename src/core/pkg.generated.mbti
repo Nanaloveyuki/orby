@@ -9,6 +9,10 @@ import {
 pub fn validate_scale_factor(Double) -> Bool
 
 // Errors
+pub(all) suberror GeometryError {
+  InvalidScaleFactor(Double)
+} derive(@debug.Debug)
+
 pub(all) suberror InitError {
   UnsupportedHost(String)
   PlatformFailure(String)
@@ -35,7 +39,7 @@ pub(all) struct LogicalSize {
   height : Double
 } derive(Eq, @debug.Debug)
 pub fn LogicalSize::new(width~ : Double, height~ : Double) -> Self
-pub fn LogicalSize::to_physical(Self, Double) -> Size
+pub fn LogicalSize::to_physical(Self, Double) -> Size raise GeometryError
 
 pub(all) struct Modifiers {
   shift : Bool
@@ -99,7 +103,7 @@ pub(all) struct Size {
   height : Int
 } derive(Eq, @debug.Debug)
 pub fn Size::new(width~ : Int, height~ : Int) -> Self
-pub fn Size::to_logical(Self, Double) -> LogicalSize
+pub fn Size::to_logical(Self, Double) -> LogicalSize raise GeometryError
 
 pub(all) enum WindowEvent {
   CloseRequested

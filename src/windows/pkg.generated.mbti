@@ -22,7 +22,6 @@ pub fn ActiveApp::set_control_flow(Self, @core.ControlFlow) -> Unit
 pub struct EventLoop {
   // private fields
 } derive(@debug.Debug)
-pub fn EventLoop::EventLoop() -> Self
 pub fn EventLoop::available_monitors(Self) -> Array[@core.Monitor]
 pub fn EventLoop::monitor(Self, @core.MonitorId) -> @core.Monitor?
 pub fn EventLoop::new() -> Self raise @core.InitError

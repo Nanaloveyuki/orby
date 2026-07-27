@@ -137,13 +137,13 @@ pub impl @windows.App for Smoke with fn window_event(self, app, _id, event) {
 }
 
 ///|
-fn main {
+fn main raise {
   match @moonview.register_custom_scheme("orby") {
     Ok(_) => ()
     Err(_error) => abort("orby moonview windows: scheme registration failed")
   }
   let app = { window: None, view: None, passed: false }
-  let event_loop = try! @windows.EventLoop::new()
+  let event_loop = @windows.EventLoop::new()
   let code = event_loop.run_app(app)
   if code != 0 || !app.passed {
     abort("orby moonview windows: smoke failed")

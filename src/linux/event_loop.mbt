@@ -19,11 +19,6 @@ pub fn EventLoop::new() -> EventLoop raise @core.InitError {
 }
 
 ///|
-pub fn EventLoop::EventLoop() -> EventLoop {
-  try! EventLoop::new()
-}
-
-///|
 fn monitor_from_index(index : Int) -> @core.Monitor? {
   if index < 0 || index >= native_monitor_count() {
     None
