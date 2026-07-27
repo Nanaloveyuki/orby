@@ -17,6 +17,20 @@ pub impl @windows.App for Smoke with fn started(self, app) {
     abort("Orby Win32 smoke expected a positive scale factor")
   }
   window.set_inner_size(@core.Size::new(width=640, height=480))
+  window.set_min_inner_size(Some(@core.Size::new(width=400, height=300)))
+  window.set_max_inner_size(Some(@core.Size::new(width=640, height=480)))
+  window.set_inner_size(@core.Size::new(width=1, height=1))
+  let constrained_size = try! window.inner_size()
+  if constrained_size.width < 400 || constrained_size.height < 300 {
+    abort("Orby Win32 smoke expected the minimum client size to be enforced")
+  }
+  window.set_inner_size(@core.Size::new(width=2000, height=2000))
+  let bounded_size = try! window.inner_size()
+  if bounded_size.width > 640 || bounded_size.height > 480 {
+    abort("Orby Win32 smoke expected the maximum client size to be enforced")
+  }
+  window.set_min_inner_size(None)
+  window.set_max_inner_size(None)
   window.set_outer_position(@core.Position::new(x=40, y=40))
   window.set_minimized(false)
   window.set_maximized(false)

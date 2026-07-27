@@ -102,6 +102,32 @@ pub fn Window::set_decorated(self : Window, decorated : Bool) -> Unit {
 }
 
 ///|
+/// Sets the physical client-area minimum size. Pass `None` to remove it. If it
+/// exceeds the current maximum on an axis, that maximum is raised to match.
+pub fn Window::set_min_inner_size(self : Window, size : @core.Size?) -> Unit {
+  if self.alive.val {
+    match size {
+      Some(size) =>
+        native_set_min_inner_size(self.hwnd, size.width, size.height)
+      None => native_set_min_inner_size(self.hwnd, 0, 0)
+    }
+  }
+}
+
+///|
+/// Sets the physical client-area maximum size. Pass `None` to remove it. If it
+/// is below the current minimum on an axis, that minimum is lowered to match.
+pub fn Window::set_max_inner_size(self : Window, size : @core.Size?) -> Unit {
+  if self.alive.val {
+    match size {
+      Some(size) =>
+        native_set_max_inner_size(self.hwnd, size.width, size.height)
+      None => native_set_max_inner_size(self.hwnd, 0, 0)
+    }
+  }
+}
+
+///|
 pub fn Window::inner_size(self : Window) -> @core.Size raise @core.WindowError {
   if !self.alive.val {
     raise @core.WindowError::Destroyed

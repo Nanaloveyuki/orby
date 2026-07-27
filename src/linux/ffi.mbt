@@ -44,6 +44,20 @@ extern "C" fn native_is_maximized(host : UInt64) -> Bool = "orby_gtk_is_maximize
 extern "C" fn native_set_decorated(host : UInt64, decorated : Bool) -> Unit = "orby_gtk_set_decorated"
 
 ///|
+extern "C" fn native_set_min_inner_size(
+  host : UInt64,
+  width : Int,
+  height : Int,
+) -> Unit = "orby_gtk_set_min_inner_size"
+
+///|
+extern "C" fn native_set_max_inner_size(
+  host : UInt64,
+  width : Int,
+  height : Int,
+) -> Unit = "orby_gtk_set_max_inner_size"
+
+///|
 extern "C" fn native_set_inner_size(
   host : UInt64,
   width : Int,
