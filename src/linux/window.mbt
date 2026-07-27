@@ -65,6 +65,42 @@ pub fn Window::set_resizable(self : Window, resizable : Bool) -> Unit {
 }
 
 ///|
+pub fn Window::inner_size(self : Window) -> @core.Size raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  @core.Size::new(
+    width=native_inner_width(self.fixed),
+    height=native_inner_height(self.fixed),
+  )
+}
+
+///|
+pub fn Window::set_inner_size(self : Window, size : @core.Size) -> Unit {
+  if self.alive.val {
+    native_set_inner_size(self.fixed, size.width, size.height)
+  }
+}
+
+///|
+pub fn Window::scale_factor(self : Window) -> Double raise @core.WindowError {
+  if !self.alive.val {
+    raise @core.WindowError::Destroyed
+  }
+  native_scale_factor(self.fixed)
+}
+
+///|
+pub fn Window::set_outer_position(
+  self : Window,
+  position : @core.Position,
+) -> Unit {
+  if self.alive.val {
+    native_set_outer_position(self.fixed, position.x, position.y)
+  }
+}
+
+///|
 /// Requests application-controlled closure. Handle `CloseRequested` and call
 /// `destroy` to accept the request; otherwise it is cancelled.
 pub fn Window::request_close(self : Window) -> Unit {

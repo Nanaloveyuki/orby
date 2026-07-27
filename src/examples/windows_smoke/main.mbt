@@ -9,6 +9,15 @@ pub impl @windows.App for Smoke with fn started(self, app) {
     @core.WindowOptions::new(title="Orby Win32 smoke", visible=true),
   )
   self.window = Some(window)
+  let initial_size = try! window.inner_size()
+  if initial_size != @core.Size::new(width=800, height=600) {
+    abort("Orby Win32 smoke expected an 800x600 client area")
+  }
+  if (try! window.scale_factor()) <= 0.0 {
+    abort("Orby Win32 smoke expected a positive scale factor")
+  }
+  window.set_inner_size(@core.Size::new(width=640, height=480))
+  window.set_outer_position(@core.Position::new(x=40, y=40))
   window.set_visible(false)
   window.set_resizable(false)
   window.set_visible(true)
@@ -34,6 +43,8 @@ pub impl @windows.App for Smoke with fn window_event(self, app, _id, event) {
           window.set_title("ignored after destruction")
           window.set_visible(false)
           window.set_resizable(true)
+          window.set_inner_size(@core.Size::new(width=320, height=240))
+          window.set_outer_position(@core.Position::new(x=0, y=0))
           window.request_close()
           window.request_redraw()
         }

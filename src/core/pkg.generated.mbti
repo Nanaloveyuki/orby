@@ -6,6 +6,7 @@ import {
 }
 
 // Values
+pub fn validate_scale_factor(Double) -> Bool
 
 // Errors
 pub(all) suberror InitError {
@@ -24,11 +25,25 @@ pub(all) enum ControlFlow {
   Wait
 } derive(Eq, @debug.Debug)
 
+pub(all) struct LogicalSize {
+  width : Double
+  height : Double
+} derive(Eq, @debug.Debug)
+pub fn LogicalSize::new(width~ : Double, height~ : Double) -> Self
+pub fn LogicalSize::to_physical(Self, Double) -> Size
+
+pub(all) struct Position {
+  x : Int
+  y : Int
+} derive(Eq, @debug.Debug)
+pub fn Position::new(x~ : Int, y~ : Int) -> Self
+
 pub(all) struct Size {
   width : Int
   height : Int
 } derive(Eq, @debug.Debug)
 pub fn Size::new(width~ : Int, height~ : Int) -> Self
+pub fn Size::to_logical(Self, Double) -> LogicalSize
 
 pub(all) enum WindowEvent {
   CloseRequested
@@ -56,3 +71,4 @@ pub fn WindowOptions::new(title? : String, size? : Size, visible? : Bool, resiza
 // Type aliases
 
 // Traits
+

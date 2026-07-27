@@ -19,6 +19,11 @@ event loop automatically; `ActiveApp::exit_with_code` can set a process result.
 Calls on a destroyed `Window` are safe no-ops; use `is_destroyed` before
 retaining or reusing a window handle across lifecycle callbacks.
 
+Window `Size` values are physical client-area pixels. Use `LogicalSize` with a
+window's `scale_factor` for device-independent layout, and use `inner_size` /
+`set_inner_size` when sizing native content. `set_outer_position` is a request
+that may be ignored by a Wayland compositor.
+
 ## Validation
 
 ```powershell

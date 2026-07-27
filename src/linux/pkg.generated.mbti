@@ -35,9 +35,13 @@ pub struct Window {
 } derive(@debug.Debug)
 pub fn Window::destroy(Self) -> Unit
 pub fn Window::id(Self) -> @core.WindowId
+pub fn Window::inner_size(Self) -> @core.Size raise @core.WindowError
 pub fn Window::is_destroyed(Self) -> Bool
 pub fn Window::request_close(Self) -> Unit
 pub fn Window::request_redraw(Self) -> Unit
+pub fn Window::scale_factor(Self) -> Double raise @core.WindowError
+pub fn Window::set_inner_size(Self, @core.Size) -> Unit
+pub fn Window::set_outer_position(Self, @core.Position) -> Unit
 pub fn Window::set_resizable(Self, Bool) -> Unit
 pub fn Window::set_title(Self, String) -> Unit
 pub fn Window::set_visible(Self, Bool) -> Unit
