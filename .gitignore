@@ -1,6 +1,9 @@
 # ref
 ref/
 
+# Temporary local plans and scratch files
+tmp/
+
 # MoonBit build products and downloaded package sources
 _build/
 .mooncakes/
