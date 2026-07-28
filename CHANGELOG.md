@@ -6,7 +6,10 @@
   basic input, fullscreen, and MoonView host integration.
 - A common `Nanaloveyuki/orby` application facade with checked startup and
   runtime lifecycle errors.
-- Native CI gates for Orby and MoonView smokes on Windows and Linux.
+- Native CI gates for Orby and MoonView smokes on Windows and Linux, including
+  assertions that a created WebView is destroyed before its host window.
+- Published `Nanaloveyuki/moonview@0.1.0-beta.3` integration, which resolves
+  `Nanaloveyuki/ajni@0.2.0` transitively.
 
 ## Compatibility
 

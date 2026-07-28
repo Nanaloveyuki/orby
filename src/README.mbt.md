@@ -146,9 +146,13 @@ handle. Resize the child in response to `WindowEvent::Resized` and destroy the
 child runtime before calling `Window::destroy`.
 
 Orby owns neither MoonView configuration nor its asynchronous WebView event
-contract. MoonView and AJNI are still evolving; versioned integration guidance,
-Android behavior, and resource/IPC examples will be added after their stable
-published releases are available.
+contract. This release resolves the published
+`Nanaloveyuki/moonview@0.1.0-beta.3` package, which in turn resolves AJNI
+`0.2.0`. Follow the [MoonView integration guide](../docs/moonview-integration.md)
+for creation, event, resize, resource-limit, failure, and teardown handling.
+
+Orby has no Android backend. Android hosts should use MoonView's Android API
+directly rather than treating an Orby `WebViewHost` as an Android surface.
 
 ## Public API Map
 

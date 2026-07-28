@@ -3,6 +3,8 @@ struct Smoke {
   mut window : @orby.Window?
   mut host : @orby.WebViewHost?
   mut view : @moonview.WebView?
+  mut view_was_created : Bool
+  mut view_was_destroyed : Bool
   mut active : @orby.ActiveApp?
   mut passed : Bool
 }
@@ -10,7 +12,10 @@ struct Smoke {
 ///|
 fn Smoke::destroy_host(self : Smoke) -> Unit {
   match self.view {
-    Some(view) => ignore(view.destroy())
+    Some(view) => {
+      ignore(view.destroy())
+      self.view_was_destroyed = true
+    }
     None => ()
   }
   self.view = None
@@ -119,7 +124,10 @@ pub impl @orby.App for Smoke with fn started(self, app) {
     on_event=event => self.handle_event(event),
   )
   match @moonview.WebView::create(native_host, options) {
-    Ok(view) => self.view = Some(view)
+    Ok(view) => {
+      self.view = Some(view)
+      self.view_was_created = true
+    }
     Err(_error) => {
       println("orby moonview windows: create rejected")
       self.destroy_host()
@@ -148,6 +156,9 @@ pub impl @orby.App for Smoke with fn window_event(self, app, _id, event) {
       }
     @orby.WindowEvent::CloseRequested => self.destroy_host()
     @orby.WindowEvent::Destroyed => {
+      if self.view_was_created && !self.view_was_destroyed {
+        abort("orby moonview windows: WebView outlived its host window")
+      }
       match self.host {
         Some(host) =>
           try host.native_handle() catch {
@@ -174,6 +185,8 @@ fn main raise {
     window: None,
     host: None,
     view: None,
+    view_was_created: false,
+    view_was_destroyed: false,
     active: None,
     passed: false,
   }

@@ -1,8 +1,11 @@
 # Releasing Orby
 
-1. Ensure the MoonView dependency is a stable compatible release, not an alpha.
-2. Update `moon.mod` and `CHANGELOG.md` for the release version.
-3. Run native validation and both MoonView integration smokes from a clean checkout.
+1. Ensure the declared MoonView version is tagged, compatible, and resolvable
+   from Mooncakes; do not release against an unpublished local checkout.
+2. Update `moon.mod` and `CHANGELOG.md` for the release version and dependency
+   version, then resolve the declared dependencies with `moon install`.
+3. Run native validation and both MoonView integration smokes from a clean
+   checkout. Each smoke must destroy its WebView before its Orby window.
 4. Merge the release gate PR and wait for GitHub Actions to pass.
 5. Create a signed `v<version>` tag matching `moon.mod`.
 6. Publish the Mooncakes package, create the GitHub release, and record package URLs.
