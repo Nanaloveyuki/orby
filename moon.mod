@@ -17,7 +17,7 @@ preferred_target = "native"
 source = "src"
 
 import {
-  "Nanaloveyuki/moonview@0.1.0-alpha.1",
+  "Nanaloveyuki/moonview@0.1.0-beta.3",
 }
 
 options(

@@ -92,5 +92,7 @@ touch, and raw device events remain outside the current API.
   validation.
 - [Root package guide](src/README.mbt.md): complete consumer API, lifecycle,
   window, input, display, and WebView-host documentation.
+- [MoonView integration](docs/moonview-integration.md): versioned desktop host
+  setup, lifecycle, resize, failure, and teardown requirements.
 - [Contributing](CONTRIBUTING.md): pull request process.
 - [Releasing](RELEASING.md): version and package release checklist.
