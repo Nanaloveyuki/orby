@@ -90,5 +90,7 @@ touch, and raw device events remain outside the current API.
 
 - [Development](docs/development.md): local setup, project requirements, and
   validation.
+- [Root package guide](src/README.mbt.md): complete consumer API, lifecycle,
+  window, input, display, and WebView-host documentation.
 - [Contributing](CONTRIBUTING.md): pull request process.
 - [Releasing](RELEASING.md): version and package release checklist.
