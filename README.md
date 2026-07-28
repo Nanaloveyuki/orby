@@ -23,6 +23,42 @@ stops, invokes `App::exiting` once, and `EventLoop::run_app` raises
 `AppError::RuntimeFailed`. Destroy a child runtime such as MoonView before its
 parent `Window`; Orby does not reverse application-owned teardown ordering.
 
+## Usage
+
+Import the root package and keep the created window until it is destroyed:
+
+```mbt
+import {
+  "Nanaloveyuki/orby",
+}
+
+struct Example {
+  mut window : @orby.Window?
+}
+
+pub impl @orby.App for Example with fn started(self, app) {
+  self.window = Some(
+    try! app.create_window(@orby.WindowOptions::new(title="Orby example")),
+  )
+}
+
+pub impl @orby.App for Example with fn window_event(self, _app, _id, event) {
+  match event {
+    @orby.WindowEvent::CloseRequested =>
+      match self.window {
+        Some(window) => window.destroy()
+        None => ()
+      }
+    _ => ()
+  }
+}
+
+fn main raise {
+  let event_loop = @orby.EventLoop::new()
+  ignore(event_loop.run_app({ window: None }))
+}
+```
+
 ## Status
 
 The initial implementation targets a small application lifecycle, native
@@ -50,32 +86,9 @@ is intentionally backend-native, while `TextInput` carries printable Unicode
 text and modifiers use `Shift`, `Control`, `Alt`, and `Meta`. IME composition,
 touch, and raw device events remain outside the current API.
 
-## Validation
+## Documentation
 
-```powershell
-moon check --target native
-moon test --target native
-moon run src/examples/windows_smoke --target native
-moon run src/examples/failure_smoke --target native
-```
-
-On Linux, install MoonBit in the target distribution, then run:
-
-```sh
-sh scripts/run-linux-smoke.sh
-```
-
-The script builds with the system C linker before executing the binary; this is
-required because GTK3 link flags are not usable with MoonBit's `tcc -run`
-debug path. The Linux backend requires GTK3 development files. MoonView
-integration also requires its published Mooncakes package and WebKitGTK 4.1.
-
-With a WebView2 SDK available, run the Windows integration smoke:
-
-```powershell
-$env:MOONVIEW_WEBVIEW2_SDK_DIR = "F:\path\to\Microsoft.Web.WebView2"
-moon run src/examples/moonview_windows --target native
-```
-
-On Linux, run `sh scripts/run-moonview-linux-smoke.sh` after installing the
-MoonView package dependencies.
+- [Development](docs/development.md): local setup, project requirements, and
+  validation.
+- [Contributing](CONTRIBUTING.md): pull request process.
+- [Releasing](RELEASING.md): version and package release checklist.
