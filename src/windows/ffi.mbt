@@ -132,4 +132,21 @@ extern "C" fn native_set_event_callback(
 ) -> Unit = "orby_win_set_event_callback"
 
 ///|
+extern "C" fn native_open_proxy() -> UInt64 = "orby_win_proxy_open"
+
+///|
+#borrow(message)
+extern "C" fn native_post_proxy_message(
+  generation : UInt64,
+  message : Bytes,
+) -> Int = "orby_win_proxy_post"
+
+///|
+extern "C" fn native_proxy_is_open(generation : UInt64) -> Bool = "orby_win_proxy_is_open"
+
+///|
+#borrow(length)
+extern "C" fn native_take_proxy_message(length : Ref[Int]) -> Bytes = "orby_win_proxy_take"
+
+///|
 extern "C" fn native_run() -> Int = "orby_win_run"

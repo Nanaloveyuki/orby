@@ -1,6 +1,6 @@
 name = "Nanaloveyuki/orby"
 
-version = "0.1.0-beta.0"
+version = "0.1.0-beta.1"
 
 description = "Native MoonBit application and window host."
 

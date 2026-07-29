@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "Nanaloveyuki/orby/linux"
 
+import {
+  "moonbitlang/core/ref",
+}
+
 // Values
 pub fn create_window(Bytes, Int, Int, Bool, Bool, Int) -> UInt64
 
@@ -28,7 +32,13 @@ pub fn monitor_metric(Int, Int) -> Int
 
 pub fn monitor_scale(Int) -> Double
 
+pub fn open_proxy() -> UInt64
+
+pub fn post_proxy_message(UInt64, Bytes) -> Int
+
 pub fn primary_monitor_index() -> Int
+
+pub fn proxy_is_open(UInt64) -> Bool
 
 pub fn request_close(UInt64) -> Unit
 
@@ -65,6 +75,8 @@ pub fn set_resizable(UInt64, Bool) -> Unit
 pub fn set_title(UInt64, Bytes) -> Unit
 
 pub fn set_visible(UInt64, Bool) -> Unit
+
+pub fn take_proxy_message(@ref.Ref[Int]) -> Bytes
 
 // Errors
 

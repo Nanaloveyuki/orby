@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-beta.1
+
+- Added a native, worker-safe event-loop proxy. EventLoop::proxy and
+  ActiveApp::proxy accept copied byte messages and deliver them to
+  App::proxy_message on the UI thread.
+- Added explicit closed, oversized-message, and bounded-queue outcomes, plus
+  Windows and Linux native wakeups and a cross-platform proxy smoke.
+
 ## 0.1.0-beta.0
 
 - Win32 and GTK3/GDK native windows, lifecycle, geometry, display snapshots,

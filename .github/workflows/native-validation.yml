@@ -60,6 +60,10 @@ jobs:
         shell: powershell
         run: moon run src/examples/failure_smoke --target native
 
+      - name: Run event-loop proxy smoke
+        shell: powershell
+        run: moon run src/examples/proxy_smoke --target native
+
       - name: Run MoonView WebView2 smoke
         shell: powershell
         run: moon run src/examples/moonview_windows --target native
@@ -98,6 +102,9 @@ jobs:
 
       - name: Run failure lifecycle smoke
         run: xvfb-run --auto-servernum moon run src/examples/failure_smoke --target native
+
+      - name: Run event-loop proxy smoke
+        run: xvfb-run --auto-servernum moon run src/examples/proxy_smoke --target native
 
       - name: Run MoonView WebKitGTK smoke
         run: xvfb-run --auto-servernum sh scripts/run-moonview-linux-smoke.sh

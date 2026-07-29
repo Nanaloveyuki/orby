@@ -3,6 +3,7 @@
 pub(open) trait App {
   fn started(Self, ActiveApp) -> Unit raise AppError = _
   fn window_event(Self, ActiveApp, WindowId, WindowEvent) -> Unit = _
+  fn proxy_message(Self, ActiveApp, Bytes) -> Unit = _
   fn about_to_wait(Self, ActiveApp) -> Unit = _
   fn exiting(Self, ActiveApp) -> Unit = _
 }
@@ -14,6 +15,11 @@ impl App with fn started(_self, _app) {
 
 ///|
 impl App with fn window_event(_self, _app, _id, _event) {
+  ()
+}
+
+///|
+impl App with fn proxy_message(_self, _app, _message) {
   ()
 }
 
@@ -30,6 +36,7 @@ impl App with fn exiting(_self, _app) {
 ///|
 pub struct EventLoop {
   priv backend : NativeBackend
+  priv proxy_generation : UInt64
   priv next_window_id : Ref[Int]
   priv runtime_failure : Ref[String?]
 } derive(Debug)
@@ -37,14 +44,18 @@ pub struct EventLoop {
 ///|
 pub struct ActiveApp {
   priv backend : NativeBackend
+  priv proxy_generation : UInt64
   priv next_window_id : Ref[Int]
   priv runtime_failure : Ref[String?]
 } derive(Debug)
 
 ///|
 pub fn EventLoop::new() -> EventLoop raise InitError {
+  let backend = initialize_backend()
+  let proxy_generation = native_open_proxy(backend)
   {
-    backend: initialize_backend(),
+    backend,
+    proxy_generation,
     next_window_id: Ref(1),
     runtime_failure: Ref(None),
   }
@@ -54,6 +65,7 @@ pub fn EventLoop::new() -> EventLoop raise InitError {
 fn EventLoop::active(self : EventLoop) -> ActiveApp {
   {
     backend: self.backend,
+    proxy_generation: self.proxy_generation,
     next_window_id: self.next_window_id,
     runtime_failure: self.runtime_failure,
   }
@@ -238,6 +250,7 @@ fn[A : App] dispatch_event(
 ) -> Unit {
   match kind {
     14 => app.about_to_wait(active)
+    15 => dispatch_proxy_messages(app, active)
     _ => {
       let window_id = WindowId::from_raw(id)
       match kind {
