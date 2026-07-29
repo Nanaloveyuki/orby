@@ -12,8 +12,13 @@ Import this package rather than `Nanaloveyuki/orby/windows` or
 
 Orby currently supports Windows and Linux with GTK3/GDK. Create the
 `EventLoop`, create windows, and call every `Window`, `WebViewHost`, and
-`ActiveApp` method from the same UI thread. Orby does not yet expose an
-event-loop proxy or general cross-thread dispatcher.
+`ActiveApp` method from the same UI thread. Workers can use `EventLoop::proxy`
+or `ActiveApp::proxy` to submit `Bytes`; `App::proxy_message` receives each
+message on the UI thread in FIFO order.
+
+The proxy copies messages into a native queue. A message is limited to 1 MiB
+and the queue to 8 MiB; `post` returns `MessageTooLarge`, `QueueFull`, or
+`Closed` instead of blocking a worker.
 
 `EventLoop::new` raises `InitError` when the native host cannot initialize. On
 Windows this requires an STA UI thread; on Linux it requires a graphical GTK3
@@ -72,7 +77,8 @@ window, decides termination.
 1. `started` runs after native callback installation and can create windows.
 2. `window_event` receives per-window activity; `about_to_wait` runs after a
    native event batch.
-3. `exiting` runs exactly once after native loop cleanup.
+3. `proxy_message` receives worker-submitted byte messages on the UI thread.
+4. `exiting` runs exactly once after native loop cleanup.
 
 Use `AppError::StartupFailed(reason)` from `started` when setup cannot
 continue. `EventLoop::run_app` finishes native cleanup, invokes `exiting`, and
@@ -134,9 +140,8 @@ focus, redraw requests, native key input, printable text input, pointer motion,
 pointer enter/leave, mouse buttons, and smooth wheel deltas.
 
 `NativeKeyEvent.code` intentionally stays backend-native. Use `TextInput` for
-printable text. IME composition, touch, raw device input, cursor control,
-drag-and-drop, and a cross-thread event-loop proxy are not part of the current
-API.
+printable text. IME composition, touch, raw device input, cursor control, and
+drag-and-drop are not part of the current API.
 
 ## WebView Hosts
 

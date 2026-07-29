@@ -37,6 +37,7 @@ pub fn ActiveApp::create_window(Self, WindowOptions) -> Window raise WindowError
 pub fn ActiveApp::exit(Self) -> Unit
 pub fn ActiveApp::exit_with_code(Self, Int) -> Unit
 pub fn ActiveApp::fail(Self, String) -> Unit
+pub fn ActiveApp::proxy(Self) -> EventLoopProxy
 pub fn ActiveApp::set_control_flow(Self, ControlFlow) -> Unit
 
 pub(all) enum ControlFlow {
@@ -51,7 +52,14 @@ pub fn EventLoop::available_monitors(Self) -> Array[Monitor]
 pub fn EventLoop::monitor(Self, MonitorId) -> Monitor?
 pub fn EventLoop::new() -> Self raise InitError
 pub fn EventLoop::primary_monitor(Self) -> Monitor?
+pub fn EventLoop::proxy(Self) -> EventLoopProxy
 pub fn[A : App] EventLoop::run_app(Self, A) -> Int raise AppError
+
+pub struct EventLoopProxy {
+  // private fields
+} derive(@debug.Debug)
+pub fn EventLoopProxy::is_closed(Self) -> Bool
+pub fn EventLoopProxy::post(Self, Bytes) -> Result[Unit, ProxyError]
 
 pub(all) enum InputState {
   Pressed
@@ -115,6 +123,12 @@ pub(all) struct Position {
   y : Int
 } derive(Eq, @debug.Debug)
 pub fn Position::new(x~ : Int, y~ : Int) -> Self
+
+pub(all) enum ProxyError {
+  Closed
+  MessageTooLarge
+  QueueFull
+} derive(Eq, @debug.Debug)
 
 pub(all) struct ScrollDelta {
   x : Double
@@ -199,6 +213,7 @@ pub fn WindowOptions::new(title? : String, size? : Size, visible? : Bool, resiza
 pub(open) trait App {
   fn started(Self, ActiveApp) -> Unit raise AppError = _
   fn window_event(Self, ActiveApp, WindowId, WindowEvent) -> Unit = _
+  fn proxy_message(Self, ActiveApp, Bytes) -> Unit = _
   fn about_to_wait(Self, ActiveApp) -> Unit = _
   fn exiting(Self, ActiveApp) -> Unit = _
 }

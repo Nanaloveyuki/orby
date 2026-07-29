@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Nanaloveyuki/orby/examples/proxy_smoke"
+
+import {
+  "Nanaloveyuki/orby",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type ProxySmoke
+pub impl @orby.App for ProxySmoke
+
+// Type aliases
+
+// Traits
+

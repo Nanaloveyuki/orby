@@ -12,6 +12,7 @@ pub impl App for InputApp with fn window_event(self, _active, _id, event) {
 fn test_active() -> ActiveApp {
   {
     backend: NativeBackend::Windows,
+    proxy_generation: 1UL,
     next_window_id: Ref(1),
     runtime_failure: Ref(None),
   }

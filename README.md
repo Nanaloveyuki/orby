@@ -14,8 +14,9 @@ events, monitor types, and `WebViewHost` are the cross-platform public API.
 The `windows` and `linux` packages are backend implementation details and are
 not application-facing APIs.
 
-All Orby calls and callbacks belong to the UI thread. A worker-thread event
-loop proxy is not available yet.
+All Orby calls and callbacks belong to the UI thread. Workers can use
+`EventLoop::proxy` to submit copied byte messages; Orby delivers them through
+`App::proxy_message` on the UI thread.
 
 `App::started` may raise `AppError::StartupFailed`. For asynchronous setup or
 runtime failures, call `ActiveApp::fail(reason)` from a UI callback. The loop

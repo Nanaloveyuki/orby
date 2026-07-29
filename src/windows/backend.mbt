@@ -168,6 +168,26 @@ pub fn set_event_callback(
 }
 
 ///|
+pub fn open_proxy() -> UInt64 {
+  native_open_proxy()
+}
+
+///|
+pub fn post_proxy_message(generation : UInt64, message : Bytes) -> Int {
+  native_post_proxy_message(generation, message)
+}
+
+///|
+pub fn proxy_is_open(generation : UInt64) -> Bool {
+  native_proxy_is_open(generation)
+}
+
+///|
+pub fn take_proxy_message(length : Ref[Int]) -> Bytes {
+  native_take_proxy_message(length)
+}
+
+///|
 pub fn run() -> Int {
   native_run()
 }

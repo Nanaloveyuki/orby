@@ -35,6 +35,7 @@ moon check --target native
 moon test --target native
 moon run src/examples/windows_smoke --target native
 moon run src/examples/failure_smoke --target native
+moon run src/examples/proxy_smoke --target native
 moon run src/examples/moonview_windows --target native
 ```
 
@@ -42,6 +43,7 @@ On Linux, use the scripts so MoonBit receives the system linker flags:
 
 ```sh
 xvfb-run --auto-servernum sh scripts/run-linux-smoke.sh
+xvfb-run --auto-servernum moon run src/examples/proxy_smoke --target native
 xvfb-run --auto-servernum sh scripts/run-moonview-linux-smoke.sh
 ```
 

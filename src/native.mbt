@@ -329,6 +329,45 @@ fn native_set_event_callback(
 }
 
 ///|
+fn native_open_proxy(backend : NativeBackend) -> UInt64 {
+  match backend {
+    Windows => @windows.open_proxy()
+    Linux => @linux.open_proxy()
+  }
+}
+
+///|
+fn native_post_proxy_message(
+  backend : NativeBackend,
+  generation : UInt64,
+  message : Bytes,
+) -> Int {
+  match backend {
+    Windows => @windows.post_proxy_message(generation, message)
+    Linux => @linux.post_proxy_message(generation, message)
+  }
+}
+
+///|
+fn native_proxy_is_open(backend : NativeBackend, generation : UInt64) -> Bool {
+  match backend {
+    Windows => @windows.proxy_is_open(generation)
+    Linux => @linux.proxy_is_open(generation)
+  }
+}
+
+///|
+fn native_take_proxy_message(
+  backend : NativeBackend,
+  length : Ref[Int],
+) -> Bytes {
+  match backend {
+    Windows => @windows.take_proxy_message(length)
+    Linux => @linux.take_proxy_message(length)
+  }
+}
+
+///|
 fn native_run(backend : NativeBackend) -> Int {
   match backend {
     Windows => @windows.run()
