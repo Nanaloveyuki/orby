@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-beta.3
+
+- Regenerated the public package metadata with MoonBit 0.1.20260803 / moonc
+  0.10.6, keeping the package compatible with the current MoonBit toolchain.
+
 ## 0.1.0-beta.2
 
 - Added `EventLoop::start_external_app` and `ExternalAppLoop` for native host
