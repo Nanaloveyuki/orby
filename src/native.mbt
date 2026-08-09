@@ -374,3 +374,28 @@ fn native_run(backend : NativeBackend) -> Int {
     Linux => @linux.run()
   }
 }
+
+///|
+fn native_poll(backend : NativeBackend, timeout? : Int) -> Int {
+  match backend {
+    Windows => @windows.poll(timeout?)
+    Linux => @linux.poll(timeout?)
+  }
+}
+
+///|
+fn native_finish(backend : NativeBackend) -> Int {
+  match backend {
+    Windows => @windows.finish()
+    Linux => @linux.finish()
+  }
+}
+
+///|
+/// This callback path must not touch MoonBit-managed values because async
+/// invokes it from a foreign polling thread. Exactly one backend is active;
+/// the other platform package compiles to a native no-op stub.
+fn wake_external_loop_from_foreign_thread() -> Unit {
+  @windows.wake_external_loop()
+  @linux.wake_external_loop()
+}

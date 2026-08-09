@@ -50,6 +50,25 @@ pub struct ActiveApp {
 } derive(Debug)
 
 ///|
+priv struct ExternalAppState[A] {
+  app : A
+  active : ActiveApp
+  mut terminated : Bool
+}
+
+///|
+/// A manually pumped application loop for integration with a foreign runtime.
+///
+/// `poll` and `terminate` must run on Orby's UI thread. The callback returned
+/// by `wakeup_callback_for_foreign_thread` is the sole exception: it is safe
+/// to invoke from a foreign thread because it calls directly into the native
+/// backend without accessing MoonBit-managed application state.
+pub struct ExternalAppLoop[A] {
+  priv backend : NativeBackend
+  priv state : Ref[ExternalAppState[A]]
+}
+
+///|
 pub fn EventLoop::new() -> EventLoop raise InitError {
   let backend = initialize_backend()
   let proxy_generation = native_open_proxy(backend)
@@ -155,6 +174,106 @@ pub fn EventLoop::monitor(self : EventLoop, id : MonitorId) -> Monitor? {
 ///|
 pub fn EventLoop::primary_monitor(self : EventLoop) -> Monitor? {
   monitor_from_index(self.backend, native_primary_monitor_index(self.backend))
+}
+
+///|
+/// Starts an application without taking ownership of the native event loop.
+///
+/// Call `poll` repeatedly from the embedding event loop, then call `terminate`
+/// exactly once after the embedding runtime has stopped. This is intended for
+/// integrations such as `moonbitlang/async`'s external event loop support.
+pub fn[A : App] EventLoop::start_external_app(
+  self : EventLoop,
+  app : A,
+) -> ExternalAppLoop[A] raise AppError {
+  let active = self.active()
+  let state = Ref({ app, active, terminated: false })
+  native_set_event_callback(self.backend, fn(
+    kind,
+    id,
+    arg0,
+    arg1,
+    argd0,
+    argd1,
+  ) {
+    let current = state.val
+    if current.active.runtime_failure.val is None {
+      dispatch_event(
+        current.app,
+        current.active,
+        kind,
+        id,
+        arg0,
+        arg1,
+        argd0,
+        argd1,
+      )
+    }
+  })
+  state.val.app.started(active) catch {
+    error => {
+      ignore(native_finish(self.backend))
+      state.val.app.exiting(active)
+      raise error
+    }
+  }
+  { backend: self.backend, state }
+}
+
+///|
+/// Pumps pending native events, then waits for no longer than `timeout`
+/// milliseconds. Omitting `timeout` waits indefinitely.
+pub fn[A : App] ExternalAppLoop::poll(
+  self : ExternalAppLoop[A],
+  timeout? : Int,
+) -> Unit raise AppError {
+  if self.state.val.terminated {
+    return
+  }
+  let status = native_poll(self.backend, timeout?)
+  if status < 0 {
+    ignore(self.terminate() catch { _ => 0 })
+    raise AppError::RuntimeFailed("native event loop polling failed")
+  }
+  match self.state.val.active.runtime_failure.val {
+    Some(reason) => {
+      ignore(self.terminate() catch { _ => 0 })
+      raise AppError::RuntimeFailed(reason)
+    }
+    None => ()
+  }
+}
+
+///|
+/// Returns a wakeup callback suitable for a native foreign thread.
+///
+/// The callback does not inspect application state and only invokes the native
+/// backend wake primitive. Do not wrap it in another MoonBit callback that
+/// captures MoonBit-managed values before passing it to a foreign thread.
+pub fn[A] ExternalAppLoop::wakeup_callback_for_foreign_thread(
+  self : ExternalAppLoop[A],
+) -> FuncRef[() -> Unit] {
+  let _ = self
+  () => wake_external_loop_from_foreign_thread()
+}
+
+///|
+/// Releases native event-loop state and invokes the application's `exiting`
+/// callback. It is idempotent so cleanup paths can safely call it after an
+/// initialization or runtime failure.
+pub fn[A : App] ExternalAppLoop::terminate(
+  self : ExternalAppLoop[A],
+) -> Int raise AppError {
+  if self.state.val.terminated {
+    return 0
+  }
+  self.state.val.terminated = true
+  let code = native_finish(self.backend)
+  self.state.val.app.exiting(self.state.val.active)
+  match self.state.val.active.runtime_failure.val {
+    Some(reason) => raise AppError::RuntimeFailed(reason)
+    None => code
+  }
 }
 
 ///|

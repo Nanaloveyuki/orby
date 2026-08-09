@@ -14,6 +14,8 @@ pub fn destroy_window(UInt64) -> Unit
 
 pub fn exit(Int) -> Unit
 
+pub fn finish() -> Int
+
 pub fn initialize() -> Bool
 
 pub fn inner_height(UInt64) -> Int
@@ -33,6 +35,8 @@ pub fn monitor_metric(Int, Int) -> Int
 pub fn monitor_scale(Int) -> Double
 
 pub fn open_proxy() -> UInt64
+
+pub fn poll(timeout? : Int) -> Int
 
 pub fn post_proxy_message(UInt64, Bytes) -> Int
 
@@ -77,6 +81,8 @@ pub fn set_title(UInt64, Bytes) -> Unit
 pub fn set_visible(UInt64, Bool) -> Unit
 
 pub fn take_proxy_message(@ref.Ref[Int]) -> Bytes
+
+pub fn wake_external_loop() -> Unit
 
 // Errors
 

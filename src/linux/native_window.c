@@ -487,16 +487,42 @@ MOONBIT_FFI_EXPORT moonbit_bytes_t orby_gtk_proxy_take(int32_t *length) {
   free(message);
   return result;
 }
-MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) {
-  while (!exit_requested) {
-    while (gtk_events_pending()) gtk_main_iteration();
-    if (exit_requested) break;
-    if (proxy_has_messages()) emit_application_event(15);
-    if (exit_requested) break;
-    emit_application_event(14);
-    if (exit_requested || poll_mode) continue;
-    gtk_main_iteration();
+static int32_t orby_gtk_process_ready_events(int emit_about_to_wait) {
+  while (gtk_events_pending()) gtk_main_iteration();
+  if (exit_requested) return 0;
+  if (proxy_has_messages()) emit_application_event(15);
+  if (exit_requested) return 0;
+  if (emit_about_to_wait) emit_application_event(14);
+  return exit_requested ? 0 : 1;
+}
+
+static gboolean orby_gtk_poll_timeout(gpointer data) {
+  (void)data;
+  return G_SOURCE_REMOVE;
+}
+
+MOONBIT_FFI_EXPORT int32_t orby_gtk_poll(int32_t timeout) {
+  int32_t status = orby_gtk_process_ready_events(1);
+  if (status <= 0 || timeout == 0 || poll_mode) return status;
+  guint timeout_source = 0;
+  if (timeout > 0) {
+    timeout_source = g_timeout_add_full(
+        G_PRIORITY_DEFAULT, (guint)timeout, orby_gtk_poll_timeout, NULL, NULL);
   }
+  gtk_main_iteration();
+  if (timeout_source != 0) {
+    GSource *source = g_main_context_find_source_by_id(
+        g_main_context_default(), timeout_source);
+    if (source != NULL) g_source_destroy(source);
+  }
+  return orby_gtk_process_ready_events(0);
+}
+
+MOONBIT_FFI_EXPORT void orby_gtk_wake_external_loop(void) {
+  g_main_context_wakeup(g_main_context_default());
+}
+
+MOONBIT_FFI_EXPORT int32_t orby_gtk_finish(void) {
   int32_t code = exit_code;
   g_mutex_lock(&proxy_lock);
   proxy_accepting = 0;
@@ -509,6 +535,16 @@ MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) {
   exit_code = 0;
   poll_mode = 0;
   return code;
+}
+
+MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) {
+  for (;;) {
+    int32_t status = orby_gtk_poll(-1);
+    if (status > 0) continue;
+    if (status < 0) exit_code = 1;
+    break;
+  }
+  return orby_gtk_finish();
 }
 #else
 #include <moonbit.h>
@@ -553,5 +589,8 @@ MOONBIT_FFI_EXPORT moonbit_bytes_t orby_gtk_proxy_take(int32_t *l) {
   if (l != NULL) *l = -1;
   return moonbit_make_bytes(0, 0);
 }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_poll(int32_t t) { (void)t; return -1; }
+MOONBIT_FFI_EXPORT void orby_gtk_wake_external_loop(void) {}
+MOONBIT_FFI_EXPORT int32_t orby_gtk_finish(void) { return 1; }
 MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) { return 1; }
 #endif

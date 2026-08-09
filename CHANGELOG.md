@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-beta.2
+
+- Added `EventLoop::start_external_app` and `ExternalAppLoop` for native host
+  loops driven by an external async runtime. The driver accepts the runtime's
+  timeout, exposes a foreign-thread-safe native wake callback, and preserves
+  the existing application teardown ordering.
+- Added Win32 and GTK3 single-step message pumping with a bounded wait. The
+  existing `EventLoop::run_app` remains the default blocking API.
+
 ## 0.1.0-beta.1
 
 - Added a native, worker-safe event-loop proxy. EventLoop::proxy and

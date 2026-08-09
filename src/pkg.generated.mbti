@@ -54,12 +54,20 @@ pub fn EventLoop::new() -> Self raise InitError
 pub fn EventLoop::primary_monitor(Self) -> Monitor?
 pub fn EventLoop::proxy(Self) -> EventLoopProxy
 pub fn[A : App] EventLoop::run_app(Self, A) -> Int raise AppError
+pub fn[A : App] EventLoop::start_external_app(Self, A) -> ExternalAppLoop[A] raise AppError
 
 pub struct EventLoopProxy {
   // private fields
 } derive(@debug.Debug)
 pub fn EventLoopProxy::is_closed(Self) -> Bool
 pub fn EventLoopProxy::post(Self, Bytes) -> Result[Unit, ProxyError]
+
+pub struct ExternalAppLoop[A] {
+  // private fields
+}
+pub fn[A : App] ExternalAppLoop::poll(Self[A], timeout? : Int) -> Unit raise AppError
+pub fn[A : App] ExternalAppLoop::terminate(Self[A]) -> Int raise AppError
+pub fn[A] ExternalAppLoop::wakeup_callback_for_foreign_thread(Self[A]) -> FuncRef[() -> Unit]
 
 pub(all) enum InputState {
   Pressed
