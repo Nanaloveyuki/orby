@@ -10,6 +10,7 @@
 typedef void (*orby_event_callback)(void *, int32_t, int32_t, int32_t, int32_t, double, double);
 
 #define ORBY_PROXY_WAKE_MESSAGE (WM_APP + 1)
+#define ORBY_EXTERNAL_WAKE_MESSAGE (WM_APP + 2)
 #define ORBY_PROXY_MAX_MESSAGE_BYTES (1024 * 1024)
 #define ORBY_PROXY_MAX_QUEUE_BYTES (8 * 1024 * 1024)
 
@@ -629,54 +630,51 @@ MOONBIT_FFI_EXPORT moonbit_bytes_t orby_win_proxy_take(int32_t *length) {
   free(message);
   return result;
 }
-MOONBIT_FFI_EXPORT int32_t orby_win_run(void) {
+static int32_t orby_win_process_ready_messages(int emit_about_to_wait) {
   MSG message;
-  int32_t code = 0;
-  for (;;) {
-    while (PeekMessageW(&message, NULL, 0, 0, PM_REMOVE)) {
-      if (message.message == WM_QUIT) {
-        code = (int32_t)message.wParam;
-        goto finish;
-      }
-      if (message.message == ORBY_PROXY_WAKE_MESSAGE) {
-        emit_application_event(15);
-        continue;
-      }
-      TranslateMessage(&message);
-      DispatchMessageW(&message);
-      if (exit_requested) {
-        code = exit_code;
-        goto finish;
-      }
-    }
-    if (proxy_has_messages()) emit_application_event(15);
-    if (exit_requested) {
-      code = exit_code;
-      break;
-    }
-    emit_application_event(14);
-    if (exit_requested) {
-      code = exit_code;
-      break;
-    }
-    if (poll_mode) continue;
-    int message_result = GetMessageW(&message, NULL, 0, 0);
-    if (message_result <= 0) {
-      code = message_result == 0 ? (int32_t)message.wParam : 1;
-      break;
+  while (PeekMessageW(&message, NULL, 0, 0, PM_REMOVE)) {
+    if (message.message == WM_QUIT) {
+      exit_requested = 1;
+      exit_code = (int32_t)message.wParam;
+      return 0;
     }
     if (message.message == ORBY_PROXY_WAKE_MESSAGE) {
       emit_application_event(15);
       continue;
     }
+    if (message.message == ORBY_EXTERNAL_WAKE_MESSAGE) continue;
     TranslateMessage(&message);
     DispatchMessageW(&message);
     if (exit_requested) {
-      code = exit_code;
-      break;
+      return 0;
     }
   }
-finish:
+  if (proxy_has_messages()) emit_application_event(15);
+  if (exit_requested) return 0;
+  if (emit_about_to_wait) emit_application_event(14);
+  return exit_requested ? 0 : 1;
+}
+
+MOONBIT_FFI_EXPORT int32_t orby_win_poll(int32_t timeout) {
+  int32_t status = orby_win_process_ready_messages(1);
+  if (status <= 0 || timeout == 0 || poll_mode) return status;
+  DWORD wait_timeout = timeout < 0 ? INFINITE : (DWORD)timeout;
+  DWORD wait_result = MsgWaitForMultipleObjectsEx(
+      0, NULL, wait_timeout, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
+  if (wait_result == WAIT_FAILED) return -1;
+  if (wait_result == WAIT_TIMEOUT) return 1;
+  return orby_win_process_ready_messages(0);
+}
+
+MOONBIT_FFI_EXPORT void orby_win_wake_external_loop(void) {
+  DWORD thread_id = ui_thread_id;
+  if (thread_id != 0) {
+    PostThreadMessageW(thread_id, ORBY_EXTERNAL_WAKE_MESSAGE, 0, 0);
+  }
+}
+
+MOONBIT_FFI_EXPORT int32_t orby_win_finish(void) {
+  int32_t code = exit_code;
   EnterCriticalSection(&proxy_lock);
   proxy_accepting = 0;
   proxy_clear_locked();
@@ -687,8 +685,19 @@ finish:
   exit_requested = 0;
   exit_code = 0;
   poll_mode = 0;
+  ui_thread_id = 0;
   if (initialized_com) { CoUninitialize(); initialized_com = 0; }
   return code;
+}
+
+MOONBIT_FFI_EXPORT int32_t orby_win_run(void) {
+  for (;;) {
+    int32_t status = orby_win_poll(-1);
+    if (status > 0) continue;
+    if (status < 0) exit_code = 1;
+    break;
+  }
+  return orby_win_finish();
 }
 #else
 #include <moonbit.h>
@@ -733,5 +742,8 @@ MOONBIT_FFI_EXPORT moonbit_bytes_t orby_win_proxy_take(int32_t *l) {
   if (l != NULL) *l = -1;
   return moonbit_make_bytes(0, 0);
 }
+MOONBIT_FFI_EXPORT int32_t orby_win_poll(int32_t t) { (void)t; return -1; }
+MOONBIT_FFI_EXPORT void orby_win_wake_external_loop(void) {}
+MOONBIT_FFI_EXPORT int32_t orby_win_finish(void) { return 1; }
 MOONBIT_FFI_EXPORT int32_t orby_win_run(void) { return 1; }
 #endif

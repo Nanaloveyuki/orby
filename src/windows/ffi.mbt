@@ -150,3 +150,12 @@ extern "C" fn native_take_proxy_message(length : Ref[Int]) -> Bytes = "orby_win_
 
 ///|
 extern "C" fn native_run() -> Int = "orby_win_run"
+
+///|
+extern "C" fn native_poll(timeout : Int) -> Int = "orby_win_poll"
+
+///|
+extern "C" fn native_finish() -> Int = "orby_win_finish"
+
+///|
+extern "C" fn native_wake_external_loop() -> Unit = "orby_win_wake_external_loop"

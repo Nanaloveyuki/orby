@@ -191,3 +191,18 @@ pub fn take_proxy_message(length : Ref[Int]) -> Bytes {
 pub fn run() -> Int {
   native_run()
 }
+
+///|
+pub fn poll(timeout? : Int) -> Int {
+  native_poll(timeout.unwrap_or(-1))
+}
+
+///|
+pub fn finish() -> Int {
+  native_finish()
+}
+
+///|
+pub fn wake_external_loop() -> Unit {
+  native_wake_external_loop()
+}
