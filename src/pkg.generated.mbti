@@ -225,4 +225,3 @@ pub(open) trait App {
   fn about_to_wait(Self, ActiveApp) -> Unit = _
   fn exiting(Self, ActiveApp) -> Unit = _
 }
-
