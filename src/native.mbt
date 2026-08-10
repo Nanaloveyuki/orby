@@ -75,6 +75,14 @@ fn native_set_visible(
 }
 
 ///|
+fn native_focus_window(backend : NativeBackend, handle : UInt64) -> Unit {
+  match backend {
+    Windows => @windows.focus_window(handle)
+    Linux => @linux.focus_window(handle)
+  }
+}
+
+///|
 fn native_set_resizable(
   backend : NativeBackend,
   handle : UInt64,

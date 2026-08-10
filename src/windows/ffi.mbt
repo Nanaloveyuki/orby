@@ -26,6 +26,9 @@ extern "C" fn native_request_redraw(hwnd : UInt64) -> Unit = "orby_win_request_r
 extern "C" fn native_set_visible(hwnd : UInt64, visible : Bool) -> Unit = "orby_win_set_visible"
 
 ///|
+extern "C" fn native_focus_window(hwnd : UInt64) -> Unit = "orby_win_focus_window"
+
+///|
 extern "C" fn native_set_resizable(hwnd : UInt64, resizable : Bool) -> Unit = "orby_win_set_resizable"
 
 ///|

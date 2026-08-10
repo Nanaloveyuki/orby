@@ -161,6 +161,7 @@ pub struct Window {
 } derive(@debug.Debug)
 pub fn Window::current_monitor(Self) -> Monitor? raise WindowError
 pub fn Window::destroy(Self) -> Unit
+pub fn Window::focus(Self) -> Unit
 pub fn Window::id(Self) -> WindowId
 pub fn Window::inner_size(Self) -> Size raise WindowError
 pub fn Window::is_destroyed(Self) -> Bool

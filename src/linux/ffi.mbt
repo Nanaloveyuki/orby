@@ -26,6 +26,9 @@ extern "C" fn native_request_redraw(host : UInt64) -> Unit = "orby_gtk_request_r
 extern "C" fn native_set_visible(host : UInt64, visible : Bool) -> Unit = "orby_gtk_set_visible"
 
 ///|
+extern "C" fn native_focus_window(host : UInt64) -> Unit = "orby_gtk_focus_window"
+
+///|
 extern "C" fn native_set_resizable(host : UInt64, resizable : Bool) -> Unit = "orby_gtk_set_resizable"
 
 ///|

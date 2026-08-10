@@ -36,6 +36,11 @@ pub fn set_visible(handle : UInt64, visible : Bool) -> Unit {
 }
 
 ///|
+pub fn focus_window(handle : UInt64) -> Unit {
+  native_focus_window(handle)
+}
+
+///|
 pub fn set_resizable(handle : UInt64, resizable : Bool) -> Unit {
   native_set_resizable(handle, resizable)
 }

@@ -400,6 +400,15 @@ MOONBIT_FFI_EXPORT void orby_win_request_redraw(uint64_t hwnd) { InvalidateRect(
 MOONBIT_FFI_EXPORT void orby_win_set_visible(uint64_t hwnd, int32_t visible) {
   ShowWindow((HWND)(uintptr_t)hwnd, visible ? SW_SHOW : SW_HIDE);
 }
+MOONBIT_FFI_EXPORT void orby_win_focus_window(uint64_t hwnd) {
+  HWND window = (HWND)(uintptr_t)hwnd;
+  if (!IsWindow(window)) return;
+  if (IsIconic(window)) ShowWindow(window, SW_RESTORE);
+  ShowWindow(window, SW_SHOW);
+  BringWindowToTop(window);
+  SetForegroundWindow(window);
+  SetFocus(window);
+}
 MOONBIT_FFI_EXPORT void orby_win_set_resizable(uint64_t hwnd, int32_t resizable) {
   HWND window = (HWND)(uintptr_t)hwnd;
   LONG_PTR style = GetWindowLongPtrW(window, GWL_STYLE);
@@ -708,6 +717,7 @@ MOONBIT_FFI_EXPORT void orby_win_destroy_window(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_set_title(uint64_t h, moonbit_bytes_t t) { (void)h; (void)t; }
 MOONBIT_FFI_EXPORT void orby_win_request_redraw(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_set_visible(uint64_t h, int32_t v) { (void)h; (void)v; }
+MOONBIT_FFI_EXPORT void orby_win_focus_window(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_set_resizable(uint64_t h, int32_t r) { (void)h; (void)r; }
 MOONBIT_FFI_EXPORT void orby_win_set_minimized(uint64_t h, int32_t v) { (void)h; (void)v; }
 MOONBIT_FFI_EXPORT int32_t orby_win_is_minimized(uint64_t h) { (void)h; return 0; }
