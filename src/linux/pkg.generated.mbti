@@ -16,6 +16,8 @@ pub fn exit(Int) -> Unit
 
 pub fn finish() -> Int
 
+pub fn focus_window(UInt64) -> Unit
+
 pub fn initialize() -> Bool
 
 pub fn inner_height(UInt64) -> Int

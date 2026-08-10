@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-beta.4
+
+- Added `Window::focus()` for restoring, showing, and requesting activation of
+  a live top-level window on Win32 and GTK3.
+
 ## 0.1.0-beta.3
 
 - Regenerated the public package metadata with MoonBit 0.1.20260803 / moonc

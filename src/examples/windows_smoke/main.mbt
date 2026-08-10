@@ -59,6 +59,7 @@ pub impl @orby.App for Smoke with fn started(self, app) {
   window.set_visible(false)
   window.set_resizable(false)
   window.set_visible(true)
+  window.focus()
   window.request_redraw()
 }
 
@@ -82,6 +83,7 @@ pub impl @orby.App for Smoke with fn window_event(self, app, _id, event) {
           window.destroy()
           window.set_title("ignored after destruction")
           window.set_visible(false)
+          window.focus()
           window.set_resizable(true)
           window.set_inner_size(@orby.Size::new(width=320, height=240))
           window.set_outer_position(@orby.Position::new(x=0, y=0))

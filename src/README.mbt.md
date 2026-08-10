@@ -119,8 +119,9 @@ validated scale factor.
 Live windows provide title, visibility, resizability, decoration, minimization,
 maximization, fullscreen, client-size constraints, redraw, close requests, and
 outer-position requests. A Wayland compositor may ignore an outer-position
-request. `set_fullscreen_on` accepts a `MonitorId` from the current monitor
-snapshot.
+request. `focus` requests that a live window is restored, shown, and activated;
+the window manager may still limit foreground activation. `set_fullscreen_on`
+accepts a `MonitorId` from the current monitor snapshot.
 
 `EventLoop::available_monitors`, `primary_monitor`, and `monitor` expose
 current display snapshots. A `Window` also has `current_monitor` and

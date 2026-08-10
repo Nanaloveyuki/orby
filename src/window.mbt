@@ -79,6 +79,16 @@ pub fn Window::set_visible(self : Window, visible : Bool) -> Unit {
 }
 
 ///|
+/// Requests that this window is shown and activated on the UI thread.
+/// Platform foreground-stealing rules may limit activation, but the request
+/// always restores a minimized window when the host permits it.
+pub fn Window::focus(self : Window) -> Unit {
+  if self.alive.val {
+    native_focus_window(self.backend, self.handle)
+  }
+}
+
+///|
 pub fn Window::set_resizable(self : Window, resizable : Bool) -> Unit {
   if self.alive.val {
     native_set_resizable(self.backend, self.handle, resizable)
