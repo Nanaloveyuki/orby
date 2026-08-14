@@ -13,7 +13,11 @@ struct Smoke {
 fn Smoke::destroy_host(self : Smoke) -> Unit {
   match self.view {
     Some(view) => {
-      ignore(view.destroy())
+      match view.destroy() {
+        Ok(_) => ()
+        Err(_error) =>
+          abort("orby moonview windows: WebView destruction failed")
+      }
       self.view_was_destroyed = true
     }
     None => ()
@@ -85,6 +89,10 @@ fn Smoke::handle_event(self : Smoke, event : @moonview.WebViewEvent) -> Unit {
       println("orby moonview windows: creation failed")
       self.destroy_host()
       self.fail_runtime("MoonView creation failed")
+    }
+    @moonview.WebViewEvent::ProcessFailed(_error) => {
+      self.destroy_host()
+      self.fail_runtime("MoonView browser process failed")
     }
     @moonview.WebViewEvent::ScriptFailed(request_id, _error) => {
       println("orby moonview windows: script failed \{request_id}")

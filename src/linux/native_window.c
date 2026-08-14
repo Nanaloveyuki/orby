@@ -12,6 +12,7 @@ static int exit_requested = 0;
 static int32_t exit_code = 0;
 static int32_t window_count = 0;
 static int poll_mode = 0;
+static int initialized = 0;
 
 #define ORBY_PROXY_MAX_MESSAGE_BYTES (1024 * 1024)
 #define ORBY_PROXY_MAX_QUEUE_BYTES (8 * 1024 * 1024)
@@ -227,15 +228,19 @@ static gboolean on_scroll(GtkWidget *, GdkEventScroll *event, gpointer data) {
 }
 
 MOONBIT_FFI_EXPORT int32_t orby_gtk_init(void) {
+  if (initialized) return 0;
   int argc = 0;
   char **argv = NULL;
   if (!gtk_init_check(&argc, &argv)) return 0;
+  initialized = 1;
   exit_requested = 0;
   exit_code = 0;
   window_count = 0;
   poll_mode = 0;
   return 1;
 }
+
+MOONBIT_FFI_EXPORT int32_t orby_gtk_is_active(void) { return initialized; }
 MOONBIT_FFI_EXPORT uint64_t orby_gtk_create_window(moonbit_bytes_t title, int32_t width, int32_t height, int32_t visible, int32_t resizable, int32_t id) {
   GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   GtkWidget *fixed = gtk_fixed_new();
@@ -543,6 +548,7 @@ MOONBIT_FFI_EXPORT int32_t orby_gtk_finish(void) {
   exit_requested = 0;
   exit_code = 0;
   poll_mode = 0;
+  initialized = 0;
   return code;
 }
 
@@ -559,6 +565,7 @@ MOONBIT_FFI_EXPORT int32_t orby_gtk_run(void) {
 #include <moonbit.h>
 #include <stdint.h>
 MOONBIT_FFI_EXPORT int32_t orby_gtk_init(void) { return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_gtk_is_active(void) { return 0; }
 MOONBIT_FFI_EXPORT uint64_t orby_gtk_create_window(moonbit_bytes_t t, int32_t w, int32_t h, int32_t v, int32_t r, int32_t i) { (void)t; (void)w; (void)h; (void)v; (void)r; (void)i; return 0; }
 MOONBIT_FFI_EXPORT void orby_gtk_destroy_window(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_gtk_set_title(uint64_t h, moonbit_bytes_t t) { (void)h; (void)t; }

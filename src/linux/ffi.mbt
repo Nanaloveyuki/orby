@@ -2,6 +2,9 @@
 extern "C" fn native_init() -> Int = "orby_gtk_init"
 
 ///|
+extern "C" fn native_is_active() -> Bool = "orby_gtk_is_active"
+
+///|
 #borrow(title)
 extern "C" fn native_create_window(
   title : Bytes,
