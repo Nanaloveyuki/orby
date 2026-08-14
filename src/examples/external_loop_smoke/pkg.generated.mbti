@@ -1,0 +1,18 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Nanaloveyuki/orby/examples/external_loop_smoke"
+
+import {
+  "Nanaloveyuki/orby",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type ExternalSmoke
+pub impl @orby.App for ExternalSmoke
+
+// Type aliases
+
+// Traits

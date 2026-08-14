@@ -297,9 +297,18 @@ pub(all) suberror GeometryError {
 
 ///|
 pub(all) suberror InitError {
+  /// Another EventLoop has already initialized Orby's process-global host.
+  AlreadyActive
   UnsupportedHost(String)
   PlatformFailure(String)
 } derive(Debug)
+
+///|
+/// Result of one external event-loop pump.
+pub(all) enum ExternalPoll {
+  Continue
+  Exited(Int)
+} derive(Eq, Debug)
 
 ///|
 pub(all) suberror WindowError {

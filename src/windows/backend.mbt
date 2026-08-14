@@ -4,6 +4,11 @@ pub fn initialize() -> Bool {
 }
 
 ///|
+pub fn is_active() -> Bool {
+  native_is_active()
+}
+
+///|
 pub fn create_window(
   title : Bytes,
   width : Int,

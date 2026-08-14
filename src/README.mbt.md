@@ -22,7 +22,8 @@ and the queue to 8 MiB; `post` returns `MessageTooLarge`, `QueueFull`, or
 
 `EventLoop::new` raises `InitError` when the native host cannot initialize. On
 Windows this requires an STA UI thread; on Linux it requires a graphical GTK3
-session.
+session. Only one EventLoop may be active in a process; construct the next one
+only after `run_app` returns or `ExternalAppLoop::terminate` completes.
 
 ## Minimal Application
 

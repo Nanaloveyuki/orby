@@ -18,6 +18,11 @@ fn initialize_backend() -> NativeBackend raise InitError {
 }
 
 ///|
+fn native_event_loop_is_active() -> Bool {
+  @windows.is_active() || @linux.is_active()
+}
+
+///|
 fn native_create_window(
   backend : NativeBackend,
   title : Bytes,

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-beta.5
+
+- Reject concurrent `EventLoop::new` calls with `InitError::AlreadyActive` so
+  a second host cannot overwrite process-global Win32 or GTK state.
+- Change `ExternalAppLoop::poll` to return `ExternalPoll`, preserving native
+  loop termination and its exit code for embedding runtimes.
+
 ## 0.1.0-beta.4
 
 - Added `Window::focus()` for restoring, showing, and requesting activation of

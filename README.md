@@ -18,6 +18,9 @@ All Orby calls and callbacks belong to the UI thread. Workers can use
 `EventLoop::proxy` to submit copied byte messages; Orby delivers them through
 `App::proxy_message` on the UI thread.
 
+Only one `EventLoop` may be active per process. Create another only after the
+previous `run_app` returns or its `ExternalAppLoop` has terminated.
+
 `App::started` may raise `AppError::StartupFailed`. For asynchronous setup or
 runtime failures, call `ActiveApp::fail(reason)` from a UI callback. The loop
 stops, invokes `App::exiting` once, and `EventLoop::run_app` raises

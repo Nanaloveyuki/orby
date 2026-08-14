@@ -24,6 +24,8 @@ pub fn inner_height(UInt64) -> Int
 
 pub fn inner_width(UInt64) -> Int
 
+pub fn is_active() -> Bool
+
 pub fn is_fullscreen(UInt64) -> Bool
 
 pub fn is_maximized(UInt64) -> Bool

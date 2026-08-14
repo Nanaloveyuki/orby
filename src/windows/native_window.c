@@ -340,6 +340,7 @@ static LRESULT CALLBACK orby_wndproc(HWND hwnd, UINT message, WPARAM wparam, LPA
 }
 
 MOONBIT_FFI_EXPORT int32_t orby_win_init(void) {
+  if (ui_thread_id != 0) return 0;
   HRESULT result = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
   if (result == S_OK || result == S_FALSE) initialized_com = 1;
   else if (result == RPC_E_CHANGED_MODE) return 0;
@@ -363,6 +364,8 @@ MOONBIT_FFI_EXPORT int32_t orby_win_init(void) {
   wc.lpszClassName = ORBY_CLASS;
   return RegisterClassExW(&wc) != 0 || GetLastError() == ERROR_CLASS_ALREADY_EXISTS;
 }
+
+MOONBIT_FFI_EXPORT int32_t orby_win_is_active(void) { return ui_thread_id != 0; }
 
 MOONBIT_FFI_EXPORT uint64_t orby_win_create_window(
     moonbit_bytes_t title, int32_t width, int32_t height, int32_t visible,
@@ -712,6 +715,7 @@ MOONBIT_FFI_EXPORT int32_t orby_win_run(void) {
 #include <moonbit.h>
 #include <stdint.h>
 MOONBIT_FFI_EXPORT int32_t orby_win_init(void) { return 0; }
+MOONBIT_FFI_EXPORT int32_t orby_win_is_active(void) { return 0; }
 MOONBIT_FFI_EXPORT uint64_t orby_win_create_window(moonbit_bytes_t t, int32_t w, int32_t h, int32_t v, int32_t r, int32_t i) { (void)t; (void)w; (void)h; (void)v; (void)r; (void)i; return 0; }
 MOONBIT_FFI_EXPORT void orby_win_destroy_window(uint64_t h) { (void)h; }
 MOONBIT_FFI_EXPORT void orby_win_set_title(uint64_t h, moonbit_bytes_t t) { (void)h; (void)t; }

@@ -19,6 +19,7 @@ pub(all) suberror GeometryError {
 } derive(@debug.Debug)
 
 pub(all) suberror InitError {
+  AlreadyActive
   UnsupportedHost(String)
   PlatformFailure(String)
 } derive(@debug.Debug)
@@ -65,9 +66,14 @@ pub fn EventLoopProxy::post(Self, Bytes) -> Result[Unit, ProxyError]
 pub struct ExternalAppLoop[A] {
   // private fields
 }
-pub fn[A : App] ExternalAppLoop::poll(Self[A], timeout? : Int) -> Unit raise AppError
+pub fn[A : App] ExternalAppLoop::poll(Self[A], timeout? : Int) -> ExternalPoll raise AppError
 pub fn[A : App] ExternalAppLoop::terminate(Self[A]) -> Int raise AppError
 pub fn[A] ExternalAppLoop::wakeup_callback_for_foreign_thread(Self[A]) -> FuncRef[() -> Unit]
+
+pub(all) enum ExternalPoll {
+  Continue
+  Exited(Int)
+} derive(Eq, @debug.Debug)
 
 pub(all) enum InputState {
   Pressed

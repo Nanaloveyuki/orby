@@ -54,7 +54,11 @@ priv struct ExternalAppState[A] {
   app : A
   active : ActiveApp
   mut terminated : Bool
+  mut exit_code : Int?
 }
+
+///|
+let event_loop_active : Ref[Bool] = Ref(false)
 
 ///|
 /// A manually pumped application loop for integration with a foreign runtime.
@@ -69,8 +73,30 @@ pub struct ExternalAppLoop[A] {
 }
 
 ///|
+fn reserve_event_loop() -> Unit raise InitError {
+  if event_loop_active.val || native_event_loop_is_active() {
+    raise InitError::AlreadyActive
+  }
+  event_loop_active.val = true
+}
+
+///|
+fn release_event_loop() -> Unit {
+  event_loop_active.val = false
+}
+
+///|
 pub fn EventLoop::new() -> EventLoop raise InitError {
-  let backend = initialize_backend()
+  reserve_event_loop()
+  let backend = initialize_backend() catch {
+    error => {
+      release_event_loop()
+      if native_event_loop_is_active() {
+        raise InitError::AlreadyActive
+      }
+      raise error
+    }
+  }
   let proxy_generation = native_open_proxy(backend)
   {
     backend,
@@ -187,7 +213,7 @@ pub fn[A : App] EventLoop::start_external_app(
   app : A,
 ) -> ExternalAppLoop[A] raise AppError {
   let active = self.active()
-  let state = Ref({ app, active, terminated: false })
+  let state = Ref({ app, active, terminated: false, exit_code: None })
   native_set_event_callback(self.backend, fn(
     kind,
     id,
@@ -213,6 +239,7 @@ pub fn[A : App] EventLoop::start_external_app(
   state.val.app.started(active) catch {
     error => {
       ignore(native_finish(self.backend))
+      release_event_loop()
       state.val.app.exiting(active)
       raise error
     }
@@ -222,13 +249,14 @@ pub fn[A : App] EventLoop::start_external_app(
 
 ///|
 /// Pumps pending native events, then waits for no longer than `timeout`
-/// milliseconds. Omitting `timeout` waits indefinitely.
+/// milliseconds. Omitting `timeout` waits indefinitely. `Exited(code)` means
+/// native cleanup and `App::exiting` have already run.
 pub fn[A : App] ExternalAppLoop::poll(
   self : ExternalAppLoop[A],
   timeout? : Int,
-) -> Unit raise AppError {
+) -> ExternalPoll raise AppError {
   if self.state.val.terminated {
-    return
+    return Exited(self.state.val.exit_code.unwrap_or(0))
   }
   let status = native_poll(self.backend, timeout?)
   if status < 0 {
@@ -240,7 +268,7 @@ pub fn[A : App] ExternalAppLoop::poll(
       ignore(self.terminate() catch { _ => 0 })
       raise AppError::RuntimeFailed(reason)
     }
-    None => ()
+    None => if status == 0 { Exited(self.terminate()) } else { Continue }
   }
 }
 
@@ -265,10 +293,12 @@ pub fn[A : App] ExternalAppLoop::terminate(
   self : ExternalAppLoop[A],
 ) -> Int raise AppError {
   if self.state.val.terminated {
-    return 0
+    return self.state.val.exit_code.unwrap_or(0)
   }
   self.state.val.terminated = true
   let code = native_finish(self.backend)
+  self.state.val.exit_code = Some(code)
+  release_event_loop()
   self.state.val.app.exiting(self.state.val.active)
   match self.state.val.active.runtime_failure.val {
     Some(reason) => raise AppError::RuntimeFailed(reason)
@@ -306,6 +336,7 @@ pub fn[A : App] EventLoop::run_app(
     }
   }
   let code = native_run(self.backend)
+  release_event_loop()
   app.exiting(active)
   match startup_failure.val {
     Some(reason) => raise AppError::StartupFailed(reason)
