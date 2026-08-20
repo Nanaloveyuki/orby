@@ -1,8 +1,8 @@
 # MoonView Integration
 
 Orby's `moon.mod` resolves the published
-`Nanaloveyuki/moonview@0.1.0-beta.3` package. MoonView resolves
-`Nanaloveyuki/ajni@0.2.0` transitively; an Orby application does not need a
+`Nanaloveyuki/moonview@0.1.0-beta.9` package. MoonView resolves
+`Nanaloveyuki/ajni@0.2.3` transitively; an Orby application does not need a
 direct AJNI dependency for the desktop integration below.
 
 This guide applies to Orby's Windows and GTK3/GDK backends. Orby does not

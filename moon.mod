@@ -1,6 +1,6 @@
 name = "Nanaloveyuki/orby"
 
-version = "0.1.0-beta.5"
+version = "0.1.0-beta.6"
 
 description = "Native MoonBit application and window host."
 
@@ -17,7 +17,7 @@ preferred_target = "native"
 source = "src"
 
 import {
-  "Nanaloveyuki/moonview@0.1.0-beta.8",
+  "Nanaloveyuki/moonview@0.1.0-beta.9",
   "Nanaloveyuki/parsec@0.1.2",
 }
 

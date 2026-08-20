@@ -154,8 +154,8 @@ child runtime before calling `Window::destroy`.
 
 Orby owns neither MoonView configuration nor its asynchronous WebView event
 contract. This release resolves the published
-`Nanaloveyuki/moonview@0.1.0-beta.3` package, which in turn resolves AJNI
-`0.2.0`. Follow the [MoonView integration guide](../docs/moonview-integration.md)
+`Nanaloveyuki/moonview@0.1.0-beta.9` package, which in turn resolves AJNI
+`0.2.3`. Follow the [MoonView integration guide](../docs/moonview-integration.md)
 for creation, event, resize, resource-limit, failure, and teardown handling.
 
 Orby has no Android backend. Android hosts should use MoonView's Android API

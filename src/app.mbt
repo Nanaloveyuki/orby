@@ -88,14 +88,9 @@ fn release_event_loop() -> Unit {
 ///|
 pub fn EventLoop::new() -> EventLoop raise InitError {
   reserve_event_loop()
-  let backend = initialize_backend() catch {
-    error => {
-      release_event_loop()
-      if native_event_loop_is_active() {
-        raise InitError::AlreadyActive
-      }
-      raise error
-    }
+  let backend = {
+    errdefer release_event_loop()
+    initialize_backend()
   }
   let proxy_generation = native_open_proxy(backend)
   {
@@ -236,14 +231,12 @@ pub fn[A : App] EventLoop::start_external_app(
       )
     }
   })
-  state.val.app.started(active) catch {
-    error => {
-      ignore(native_finish(self.backend))
-      release_event_loop()
-      state.val.app.exiting(active)
-      raise error
-    }
+  errdefer {
+    ignore(native_finish(self.backend))
+    release_event_loop()
+    state.val.app.exiting(active)
   }
+  state.val.app.started(active)
   { backend: self.backend, state }
 }
 

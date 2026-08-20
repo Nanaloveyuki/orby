@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-beta.6
+
+- Pin the project to MoonBit 0.10.9.
+- Update the desktop WebView host integration to MoonView 0.1.0-beta.9.
+- Keep external event-loop termination and bounded native cleanup observable
+  for applications embedding Orby in another runtime.
+
 ## 0.1.0-beta.5
 
 - Reject concurrent `EventLoop::new` calls with `InitError::AlreadyActive` so
