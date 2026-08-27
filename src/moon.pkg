@@ -4,4 +4,8 @@ import {
   "Nanaloveyuki/orby/windows",
 }
 
+import {
+  "moonbitlang/core/quickcheck",
+} for "wbtest"
+
 supported_targets = "native"
