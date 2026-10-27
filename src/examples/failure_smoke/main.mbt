@@ -37,7 +37,7 @@ fn assert_failure(
   expected : String,
 ) -> Unit raise @orby.InitError {
   let event_loop = @orby.EventLoop::new()
-  let app = { mode, exiting_called: false }
+  let app = { mode, exiting_called: false, }
   try event_loop.run_app(app) catch {
     @orby.AppError::StartupFailed(reason) =>
       if expected != reason {

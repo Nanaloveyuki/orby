@@ -1,7 +1,7 @@
 ///|
 test "quickcheck: proxy status mapping is total" {
   @quickcheck.check(
-    (status : Int) => {
+    (status : Int32) => {
       match proxy_post_result(status) {
         Ok(_) => status == 1
         Err(MessageTooLarge) => status == 2

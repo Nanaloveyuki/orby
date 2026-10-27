@@ -6,23 +6,23 @@ import {
 }
 
 // Values
-pub fn create_window(Bytes, Int, Int, Bool, Bool, Int) -> UInt64
+pub fn create_window(Bytes, Int32, Int32, Bool, Bool, Int32) -> UInt64
 
-pub fn current_monitor_index(UInt64) -> Int
+pub fn current_monitor_index(UInt64) -> Int32
 
 pub fn destroy_window(UInt64) -> Unit
 
-pub fn exit(Int) -> Unit
+pub fn exit(Int32) -> Unit
 
-pub fn finish() -> Int
+pub fn finish() -> Int32
 
 pub fn focus_window(UInt64) -> Unit
 
 pub fn initialize() -> Bool
 
-pub fn inner_height(UInt64) -> Int
+pub fn inner_height(UInt64) -> Int32
 
-pub fn inner_width(UInt64) -> Int
+pub fn inner_width(UInt64) -> Int32
 
 pub fn is_active() -> Bool
 
@@ -32,19 +32,19 @@ pub fn is_maximized(UInt64) -> Bool
 
 pub fn is_minimized(UInt64) -> Bool
 
-pub fn monitor_count() -> Int
+pub fn monitor_count() -> Int32
 
-pub fn monitor_metric(Int, Int) -> Int
+pub fn monitor_metric(Int32, Int32) -> Int32
 
-pub fn monitor_scale(Int) -> Double
+pub fn monitor_scale(Int32) -> Double
 
 pub fn open_proxy() -> UInt64
 
-pub fn poll(timeout? : Int) -> Int
+pub fn poll(timeout? : Int32) -> Int32
 
-pub fn post_proxy_message(UInt64, Bytes) -> Int
+pub fn post_proxy_message(UInt64, Bytes) -> Int32
 
-pub fn primary_monitor_index() -> Int
+pub fn primary_monitor_index() -> Int32
 
 pub fn proxy_is_open(UInt64) -> Bool
 
@@ -52,7 +52,7 @@ pub fn request_close(UInt64) -> Unit
 
 pub fn request_redraw(UInt64) -> Unit
 
-pub fn run() -> Int
+pub fn run() -> Int32
 
 pub fn scale_factor(UInt64) -> Double
 
@@ -60,23 +60,23 @@ pub fn set_control_flow(Bool) -> Unit
 
 pub fn set_decorated(UInt64, Bool) -> Unit
 
-pub fn set_event_callback((Int, Int, Int, Int, Double, Double) -> Unit) -> Unit
+pub fn set_event_callback((Int32, Int32, Int32, Int32, Double, Double) -> Unit) -> Unit
 
 pub fn set_fullscreen(UInt64, Bool) -> Unit
 
-pub fn set_fullscreen_on(UInt64, Int) -> Bool
+pub fn set_fullscreen_on(UInt64, Int32) -> Bool
 
-pub fn set_inner_size(UInt64, Int, Int) -> Unit
+pub fn set_inner_size(UInt64, Int32, Int32) -> Unit
 
-pub fn set_max_inner_size(UInt64, Int, Int) -> Unit
+pub fn set_max_inner_size(UInt64, Int32, Int32) -> Unit
 
 pub fn set_maximized(UInt64, Bool) -> Unit
 
-pub fn set_min_inner_size(UInt64, Int, Int) -> Unit
+pub fn set_min_inner_size(UInt64, Int32, Int32) -> Unit
 
 pub fn set_minimized(UInt64, Bool) -> Unit
 
-pub fn set_outer_position(UInt64, Int, Int) -> Unit
+pub fn set_outer_position(UInt64, Int32, Int32) -> Unit
 
 pub fn set_resizable(UInt64, Bool) -> Unit
 
@@ -84,7 +84,7 @@ pub fn set_title(UInt64, Bytes) -> Unit
 
 pub fn set_visible(UInt64, Bool) -> Unit
 
-pub fn take_proxy_message(@ref.Ref[Int]) -> Bytes
+pub fn take_proxy_message(@ref.Ref[Int32]) -> Bytes
 
 pub fn wake_external_loop() -> Unit
 

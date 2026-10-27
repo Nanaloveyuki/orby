@@ -37,24 +37,30 @@ impl App with fn exiting(_self, _app) {
 pub struct EventLoop {
   priv backend : NativeBackend
   priv proxy_generation : UInt64
-  priv next_window_id : Ref[Int]
+  priv next_window_id : Ref[Int32]
   priv runtime_failure : Ref[String?]
 } derive(Debug)
+
+///|
+pub extend EventLoop with Debug::{to_repr}
 
 ///|
 pub struct ActiveApp {
   priv backend : NativeBackend
   priv proxy_generation : UInt64
-  priv next_window_id : Ref[Int]
+  priv next_window_id : Ref[Int32]
   priv runtime_failure : Ref[String?]
 } derive(Debug)
+
+///|
+pub extend ActiveApp with Debug::{to_repr}
 
 ///|
 priv struct ExternalAppState[A] {
   app : A
   active : ActiveApp
   mut terminated : Bool
-  mut exit_code : Int?
+  mut exit_code : Int32?
 }
 
 ///|
@@ -137,7 +143,7 @@ pub fn ActiveApp::exit(self : ActiveApp) -> Unit {
 }
 
 ///|
-pub fn ActiveApp::exit_with_code(self : ActiveApp, code : Int) -> Unit {
+pub fn ActiveApp::exit_with_code(self : ActiveApp, code : Int32) -> Unit {
   native_exit(self.backend, code)
 }
 
@@ -208,7 +214,7 @@ pub fn[A : App] EventLoop::start_external_app(
   app : A,
 ) -> ExternalAppLoop[A] raise AppError {
   let active = self.active()
-  let state = Ref({ app, active, terminated: false, exit_code: None })
+  let state = Ref({ app, active, terminated: false, exit_code: None, })
   native_set_event_callback(self.backend, fn(
     kind,
     id,
@@ -237,7 +243,7 @@ pub fn[A : App] EventLoop::start_external_app(
     state.val.app.exiting(active)
   }
   state.val.app.started(active)
-  { backend: self.backend, state }
+  { backend: self.backend, state, }
 }
 
 ///|
@@ -246,7 +252,7 @@ pub fn[A : App] EventLoop::start_external_app(
 /// native cleanup and `App::exiting` have already run.
 pub fn[A : App] ExternalAppLoop::poll(
   self : ExternalAppLoop[A],
-  timeout? : Int,
+  timeout? : Int32,
 ) -> ExternalPoll raise AppError {
   if self.state.val.terminated {
     return Exited(self.state.val.exit_code.unwrap_or(0))
@@ -284,7 +290,7 @@ pub fn[A] ExternalAppLoop::wakeup_callback_for_foreign_thread(
 /// initialization or runtime failure.
 pub fn[A : App] ExternalAppLoop::terminate(
   self : ExternalAppLoop[A],
-) -> Int raise AppError {
+) -> Int32 raise AppError {
   if self.state.val.terminated {
     return self.state.val.exit_code.unwrap_or(0)
   }
@@ -303,7 +309,7 @@ pub fn[A : App] ExternalAppLoop::terminate(
 pub fn[A : App] EventLoop::run_app(
   self : EventLoop,
   app : A,
-) -> Int raise AppError {
+) -> Int32 raise AppError {
   let active = self.active()
   let startup_failure : Ref[String?] = Ref(None)
   native_set_event_callback(self.backend, fn(
@@ -355,7 +361,7 @@ fn available_monitors_for(backend : NativeBackend) -> Array[Monitor] {
 }
 
 ///|
-fn monitor_from_index(backend : NativeBackend, index : Int) -> Monitor? {
+fn monitor_from_index(backend : NativeBackend, index : Int32) -> Monitor? {
   if index < 0 || index >= native_monitor_count(backend) {
     None
   } else {
@@ -384,10 +390,10 @@ fn monitor_from_index(backend : NativeBackend, index : Int) -> Monitor? {
 fn[A : App] dispatch_event(
   app : A,
   active : ActiveApp,
-  kind : Int,
-  id : Int,
-  arg0 : Int,
-  arg1 : Int,
+  kind : Int32,
+  id : Int32,
+  arg0 : Int32,
+  arg1 : Int32,
   argd0 : Double,
   argd1 : Double,
 ) -> Unit {

@@ -1,12 +1,18 @@
 ///|
 /// Physical client-area size in native pixels.
 pub(all) struct Size {
-  width : Int
-  height : Int
+  width : Int32
+  height : Int32
 } derive(Eq, Debug)
 
 ///|
-pub fn Size::new(width~ : Int, height~ : Int) -> Size {
+pub extend Size with Eq::{equal, not_equal}
+
+///|
+pub extend Size with Debug::{to_repr}
+
+///|
+pub fn Size::new(width~ : Int32, height~ : Int32) -> Size {
   {
     width: if width < 1 {
       1
@@ -33,6 +39,12 @@ pub(all) struct LogicalSize {
   width : Double
   height : Double
 } derive(Eq, Debug)
+
+///|
+pub extend LogicalSize with Eq::{equal, not_equal}
+
+///|
+pub extend LogicalSize with Debug::{to_repr}
 
 ///|
 pub fn LogicalSize::new(width~ : Double, height~ : Double) -> LogicalSize {
@@ -82,59 +94,77 @@ pub fn Size::to_logical(
 
 ///|
 pub(all) struct Position {
-  x : Int
-  y : Int
+  x : Int32
+  y : Int32
 } derive(Eq, Debug)
 
 ///|
-pub fn Position::new(x~ : Int, y~ : Int) -> Position {
-  { x, y }
+pub extend Position with Eq::{equal, not_equal}
+
+///|
+pub extend Position with Debug::{to_repr}
+
+///|
+pub fn Position::new(x~ : Int32, y~ : Int32) -> Position {
+  { x, y, }
 }
 
 ///|
 pub struct MonitorId {
-  priv index_ : Int
+  priv index_ : Int32
 } derive(Eq, Debug)
 
 ///|
-pub fn MonitorId::from_index(index : Int) -> MonitorId? {
+pub extend MonitorId with Eq::{equal, not_equal}
+
+///|
+pub extend MonitorId with Debug::{to_repr}
+
+///|
+pub fn MonitorId::from_index(index : Int32) -> MonitorId? {
   if index < 0 {
     None
   } else {
-    Some({ index_: index })
+    Some({ index_: index, })
   }
 }
 
 ///|
-pub fn MonitorId::index(self : MonitorId) -> Int {
+pub fn MonitorId::index(self : MonitorId) -> Int32 {
   self.index_
 }
 
 ///|
 pub(all) struct Monitor {
   id : MonitorId
-  x : Int
-  y : Int
-  width : Int
-  height : Int
-  work_x : Int
-  work_y : Int
-  work_width : Int
-  work_height : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  height : Int32
+  work_x : Int32
+  work_y : Int32
+  work_width : Int32
+  work_height : Int32
   scale_factor : Double
 } derive(Eq, Debug)
 
 ///|
+pub extend Monitor with Eq::{equal, not_equal}
+
+///|
+pub extend Monitor with Debug::{to_repr}
+
+///|
 pub fn Monitor::new(
   id~ : MonitorId,
-  x~ : Int,
-  y~ : Int,
-  width~ : Int,
-  height~ : Int,
-  work_x~ : Int,
-  work_y~ : Int,
-  work_width~ : Int,
-  work_height~ : Int,
+  x~ : Int32,
+  y~ : Int32,
+  width~ : Int32,
+  height~ : Int32,
+  work_x~ : Int32,
+  work_y~ : Int32,
+  work_width~ : Int32,
+  work_height~ : Int32,
   scale_factor~ : Double,
 ) -> Monitor {
   {
@@ -173,16 +203,22 @@ pub fn Monitor::new(
 
 ///|
 pub(all) struct WindowId {
-  raw : Int
+  raw : Int32
 } derive(Eq, Debug)
 
 ///|
-pub fn WindowId::from_raw(raw : Int) -> WindowId {
+pub extend WindowId with Eq::{equal, not_equal}
+
+///|
+pub extend WindowId with Debug::{to_repr}
+
+///|
+pub fn WindowId::from_raw(raw : Int32) -> WindowId {
   { raw, }
 }
 
 ///|
-pub fn WindowId::raw(self : WindowId) -> Int {
+pub fn WindowId::raw(self : WindowId) -> Int32 {
   self.raw
 }
 
@@ -193,10 +229,22 @@ pub(all) enum ControlFlow {
 } derive(Eq, Debug)
 
 ///|
+pub extend ControlFlow with Eq::{equal, not_equal}
+
+///|
+pub extend ControlFlow with Debug::{to_repr}
+
+///|
 pub(all) enum InputState {
   Pressed
   Released
 } derive(Eq, Debug)
+
+///|
+pub extend InputState with Eq::{equal, not_equal}
+
+///|
+pub extend InputState with Debug::{to_repr}
 
 ///|
 pub(all) struct Modifiers {
@@ -207,31 +255,43 @@ pub(all) struct Modifiers {
 } derive(Eq, Debug)
 
 ///|
+pub extend Modifiers with Eq::{equal, not_equal}
+
+///|
+pub extend Modifiers with Debug::{to_repr}
+
+///|
 pub fn Modifiers::new(
-  shift? : Bool = false,
-  control? : Bool = false,
-  alt? : Bool = false,
-  meta? : Bool = false,
+  shift~ : Bool = false,
+  control~ : Bool = false,
+  alt~ : Bool = false,
+  meta~ : Bool = false,
 ) -> Modifiers {
-  { shift, control, alt, meta }
+  { shift, control, alt, meta, }
 }
 
 ///|
 pub(all) struct NativeKeyEvent {
-  code : Int
+  code : Int32
   state : InputState
   repeat : Bool
   modifiers : Modifiers
 } derive(Eq, Debug)
 
 ///|
+pub extend NativeKeyEvent with Eq::{equal, not_equal}
+
+///|
+pub extend NativeKeyEvent with Debug::{to_repr}
+
+///|
 pub fn NativeKeyEvent::new(
-  code~ : Int,
+  code~ : Int32,
   state~ : InputState,
-  repeat? : Bool = false,
-  modifiers? : Modifiers = Modifiers::new(),
+  repeat~ : Bool = false,
+  modifiers~ : Modifiers = Modifiers::new(),
 ) -> NativeKeyEvent {
-  { code, state, repeat, modifiers }
+  { code, state, repeat, modifiers, }
 }
 
 ///|
@@ -241,8 +301,14 @@ pub(all) enum MouseButton {
   Middle
   Back
   Forward
-  Other(Int)
+  Other(Int32)
 } derive(Eq, Debug)
+
+///|
+pub extend MouseButton with Eq::{equal, not_equal}
+
+///|
+pub extend MouseButton with Debug::{to_repr}
 
 ///|
 pub(all) struct ScrollDelta {
@@ -251,8 +317,14 @@ pub(all) struct ScrollDelta {
 } derive(Eq, Debug)
 
 ///|
+pub extend ScrollDelta with Eq::{equal, not_equal}
+
+///|
+pub extend ScrollDelta with Debug::{to_repr}
+
+///|
 pub fn ScrollDelta::new(x~ : Double, y~ : Double) -> ScrollDelta {
-  { x, y }
+  { x, y, }
 }
 
 ///|
@@ -273,6 +345,9 @@ pub(all) enum WindowEvent {
 } derive(Debug)
 
 ///|
+pub extend WindowEvent with Debug::{to_repr}
+
+///|
 pub(all) struct WindowOptions {
   title : String
   size : Size
@@ -281,19 +356,28 @@ pub(all) struct WindowOptions {
 } derive(Eq, Debug)
 
 ///|
+pub extend WindowOptions with Eq::{equal, not_equal}
+
+///|
+pub extend WindowOptions with Debug::{to_repr}
+
+///|
 pub fn WindowOptions::new(
-  title? : String = "Orby",
-  size? : Size = Size::new(width=800, height=600),
-  visible? : Bool = true,
-  resizable? : Bool = true,
+  title~ : String = "Orby",
+  size~ : Size = Size::new(width=800, height=600),
+  visible~ : Bool = true,
+  resizable~ : Bool = true,
 ) -> WindowOptions {
-  { title, size, visible, resizable }
+  { title, size, visible, resizable, }
 }
 
 ///|
 pub(all) suberror GeometryError {
   InvalidScaleFactor(Double)
 } derive(Debug)
+
+///|
+pub extend GeometryError with Debug::{to_repr}
 
 ///|
 pub(all) suberror InitError {
@@ -304,11 +388,20 @@ pub(all) suberror InitError {
 } derive(Debug)
 
 ///|
+pub extend InitError with Debug::{to_repr}
+
+///|
 /// Result of one external event-loop pump.
 pub(all) enum ExternalPoll {
   Continue
-  Exited(Int)
+  Exited(Int32)
 } derive(Eq, Debug)
+
+///|
+pub extend ExternalPoll with Eq::{equal, not_equal}
+
+///|
+pub extend ExternalPoll with Debug::{to_repr}
 
 ///|
 pub(all) suberror WindowError {
@@ -318,7 +411,13 @@ pub(all) suberror WindowError {
 } derive(Debug)
 
 ///|
+pub extend WindowError with Debug::{to_repr}
+
+///|
 pub(all) suberror AppError {
   StartupFailed(String)
   RuntimeFailed(String)
 } derive(Debug)
+
+///|
+pub extend AppError with Debug::{to_repr}

@@ -13,22 +13,26 @@ pub(all) suberror AppError {
   StartupFailed(String)
   RuntimeFailed(String)
 } derive(@debug.Debug)
+pub fn AppError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror GeometryError {
   InvalidScaleFactor(Double)
 } derive(@debug.Debug)
+pub fn GeometryError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror InitError {
   AlreadyActive
   UnsupportedHost(String)
   PlatformFailure(String)
 } derive(@debug.Debug)
+pub fn InitError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror WindowError {
   CreationFailed(String)
   MonitorUnavailable(MonitorId)
   Destroyed
 } derive(@debug.Debug)
+pub fn WindowError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub struct ActiveApp {
@@ -36,15 +40,19 @@ pub struct ActiveApp {
 } derive(@debug.Debug)
 pub fn ActiveApp::create_window(Self, WindowOptions) -> Window raise WindowError
 pub fn ActiveApp::exit(Self) -> Unit
-pub fn ActiveApp::exit_with_code(Self, Int) -> Unit
+pub fn ActiveApp::exit_with_code(Self, Int32) -> Unit
 pub fn ActiveApp::fail(Self, String) -> Unit
 pub fn ActiveApp::proxy(Self) -> EventLoopProxy
 pub fn ActiveApp::set_control_flow(Self, ControlFlow) -> Unit
+pub fn ActiveApp::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ControlFlow {
   Poll
   Wait
 } derive(Eq, @debug.Debug)
+pub fn ControlFlow::equal(Self, Self) -> Bool
+pub fn ControlFlow::not_equal(Self, Self) -> Bool
+pub fn ControlFlow::to_repr(Self) -> @debug.Repr
 
 pub struct EventLoop {
   // private fields
@@ -54,38 +62,49 @@ pub fn EventLoop::monitor(Self, MonitorId) -> Monitor?
 pub fn EventLoop::new() -> Self raise InitError
 pub fn EventLoop::primary_monitor(Self) -> Monitor?
 pub fn EventLoop::proxy(Self) -> EventLoopProxy
-pub fn[A : App] EventLoop::run_app(Self, A) -> Int raise AppError
+pub fn[A : App] EventLoop::run_app(Self, A) -> Int32 raise AppError
 pub fn[A : App] EventLoop::start_external_app(Self, A) -> ExternalAppLoop[A] raise AppError
+pub fn EventLoop::to_repr(Self) -> @debug.Repr
 
 pub struct EventLoopProxy {
   // private fields
 } derive(@debug.Debug)
 pub fn EventLoopProxy::is_closed(Self) -> Bool
 pub fn EventLoopProxy::post(Self, Bytes) -> Result[Unit, ProxyError]
+pub fn EventLoopProxy::to_repr(Self) -> @debug.Repr
 
 pub struct ExternalAppLoop[A] {
   // private fields
 }
-pub fn[A : App] ExternalAppLoop::poll(Self[A], timeout? : Int) -> ExternalPoll raise AppError
-pub fn[A : App] ExternalAppLoop::terminate(Self[A]) -> Int raise AppError
+pub fn[A : App] ExternalAppLoop::poll(Self[A], timeout? : Int32) -> ExternalPoll raise AppError
+pub fn[A : App] ExternalAppLoop::terminate(Self[A]) -> Int32 raise AppError
 pub fn[A] ExternalAppLoop::wakeup_callback_for_foreign_thread(Self[A]) -> FuncRef[() -> Unit]
 
 pub(all) enum ExternalPoll {
   Continue
-  Exited(Int)
+  Exited(Int32)
 } derive(Eq, @debug.Debug)
+pub fn ExternalPoll::equal(Self, Self) -> Bool
+pub fn ExternalPoll::not_equal(Self, Self) -> Bool
+pub fn ExternalPoll::to_repr(Self) -> @debug.Repr
 
 pub(all) enum InputState {
   Pressed
   Released
 } derive(Eq, @debug.Debug)
+pub fn InputState::equal(Self, Self) -> Bool
+pub fn InputState::not_equal(Self, Self) -> Bool
+pub fn InputState::to_repr(Self) -> @debug.Repr
 
 pub(all) struct LogicalSize {
   width : Double
   height : Double
 } derive(Eq, @debug.Debug)
+pub fn LogicalSize::equal(Self, Self) -> Bool
 pub fn LogicalSize::new(width~ : Double, height~ : Double) -> Self
+pub fn LogicalSize::not_equal(Self, Self) -> Bool
 pub fn LogicalSize::to_physical(Self, Double) -> Size raise GeometryError
+pub fn LogicalSize::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Modifiers {
   shift : Bool
@@ -93,27 +112,36 @@ pub(all) struct Modifiers {
   alt : Bool
   meta : Bool
 } derive(Eq, @debug.Debug)
+pub fn Modifiers::equal(Self, Self) -> Bool
 pub fn Modifiers::new(shift? : Bool, control? : Bool, alt? : Bool, meta? : Bool) -> Self
+pub fn Modifiers::not_equal(Self, Self) -> Bool
+pub fn Modifiers::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Monitor {
   id : MonitorId
-  x : Int
-  y : Int
-  width : Int
-  height : Int
-  work_x : Int
-  work_y : Int
-  work_width : Int
-  work_height : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  height : Int32
+  work_x : Int32
+  work_y : Int32
+  work_width : Int32
+  work_height : Int32
   scale_factor : Double
 } derive(Eq, @debug.Debug)
-pub fn Monitor::new(id~ : MonitorId, x~ : Int, y~ : Int, width~ : Int, height~ : Int, work_x~ : Int, work_y~ : Int, work_width~ : Int, work_height~ : Int, scale_factor~ : Double) -> Self
+pub fn Monitor::equal(Self, Self) -> Bool
+pub fn Monitor::new(id~ : MonitorId, x~ : Int32, y~ : Int32, width~ : Int32, height~ : Int32, work_x~ : Int32, work_y~ : Int32, work_width~ : Int32, work_height~ : Int32, scale_factor~ : Double) -> Self
+pub fn Monitor::not_equal(Self, Self) -> Bool
+pub fn Monitor::to_repr(Self) -> @debug.Repr
 
 pub struct MonitorId {
   // private fields
 } derive(Eq, @debug.Debug)
-pub fn MonitorId::from_index(Int) -> Self?
-pub fn MonitorId::index(Self) -> Int
+pub fn MonitorId::equal(Self, Self) -> Bool
+pub fn MonitorId::from_index(Int32) -> Self?
+pub fn MonitorId::index(Self) -> Int32
+pub fn MonitorId::not_equal(Self, Self) -> Bool
+pub fn MonitorId::to_repr(Self) -> @debug.Repr
 
 pub(all) enum MouseButton {
   Left
@@ -121,52 +149,72 @@ pub(all) enum MouseButton {
   Middle
   Back
   Forward
-  Other(Int)
+  Other(Int32)
 } derive(Eq, @debug.Debug)
+pub fn MouseButton::equal(Self, Self) -> Bool
+pub fn MouseButton::not_equal(Self, Self) -> Bool
+pub fn MouseButton::to_repr(Self) -> @debug.Repr
 
 pub(all) struct NativeKeyEvent {
-  code : Int
+  code : Int32
   state : InputState
   repeat : Bool
   modifiers : Modifiers
 } derive(Eq, @debug.Debug)
-pub fn NativeKeyEvent::new(code~ : Int, state~ : InputState, repeat? : Bool, modifiers? : Modifiers) -> Self
+pub fn NativeKeyEvent::equal(Self, Self) -> Bool
+pub fn NativeKeyEvent::new(code~ : Int32, state~ : InputState, repeat? : Bool, modifiers? : Modifiers) -> Self
+pub fn NativeKeyEvent::not_equal(Self, Self) -> Bool
+pub fn NativeKeyEvent::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Position {
-  x : Int
-  y : Int
+  x : Int32
+  y : Int32
 } derive(Eq, @debug.Debug)
-pub fn Position::new(x~ : Int, y~ : Int) -> Self
+pub fn Position::equal(Self, Self) -> Bool
+pub fn Position::new(x~ : Int32, y~ : Int32) -> Self
+pub fn Position::not_equal(Self, Self) -> Bool
+pub fn Position::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ProxyError {
   Closed
   MessageTooLarge
   QueueFull
 } derive(Eq, @debug.Debug)
+pub fn ProxyError::equal(Self, Self) -> Bool
+pub fn ProxyError::not_equal(Self, Self) -> Bool
+pub fn ProxyError::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ScrollDelta {
   x : Double
   y : Double
 } derive(Eq, @debug.Debug)
+pub fn ScrollDelta::equal(Self, Self) -> Bool
 pub fn ScrollDelta::new(x~ : Double, y~ : Double) -> Self
+pub fn ScrollDelta::not_equal(Self, Self) -> Bool
+pub fn ScrollDelta::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Size {
-  width : Int
-  height : Int
+  width : Int32
+  height : Int32
 } derive(Eq, @debug.Debug)
-pub fn Size::new(width~ : Int, height~ : Int) -> Self
+pub fn Size::equal(Self, Self) -> Bool
+pub fn Size::new(width~ : Int32, height~ : Int32) -> Self
+pub fn Size::not_equal(Self, Self) -> Bool
 pub fn Size::to_logical(Self, Double) -> LogicalSize raise GeometryError
+pub fn Size::to_repr(Self) -> @debug.Repr
 
 pub struct WebViewHost {
   // private fields
 } derive(@debug.Debug)
 pub fn WebViewHost::native_handle(Self) -> UInt64 raise WindowError
+pub fn WebViewHost::to_repr(Self) -> @debug.Repr
 
 pub struct Window {
   // private fields
 } derive(@debug.Debug)
 pub fn Window::current_monitor(Self) -> Monitor? raise WindowError
 pub fn Window::destroy(Self) -> Unit
+pub fn Window::equal(Self, Self) -> Bool
 pub fn Window::focus(Self) -> Unit
 pub fn Window::id(Self) -> WindowId
 pub fn Window::inner_size(Self) -> Size raise WindowError
@@ -174,6 +222,7 @@ pub fn Window::is_destroyed(Self) -> Bool
 pub fn Window::is_fullscreen(Self) -> Bool raise WindowError
 pub fn Window::is_maximized(Self) -> Bool raise WindowError
 pub fn Window::is_minimized(Self) -> Bool raise WindowError
+pub fn Window::not_equal(Self, Self) -> Bool
 pub fn Window::request_close(Self) -> Unit
 pub fn Window::request_redraw(Self) -> Unit
 pub fn Window::scale_factor(Self) -> Double raise WindowError
@@ -189,6 +238,7 @@ pub fn Window::set_outer_position(Self, Position) -> Unit
 pub fn Window::set_resizable(Self, Bool) -> Unit
 pub fn Window::set_title(Self, String) -> Unit
 pub fn Window::set_visible(Self, Bool) -> Unit
+pub fn Window::to_repr(Self) -> @debug.Repr
 pub fn Window::webview_host(Self) -> WebViewHost raise WindowError
 pub impl Eq for Window
 
@@ -207,12 +257,16 @@ pub(all) enum WindowEvent {
   MouseInput(MouseButton, InputState, Modifiers)
   MouseWheel(ScrollDelta, Modifiers)
 } derive(@debug.Debug)
+pub fn WindowEvent::to_repr(Self) -> @debug.Repr
 
 pub(all) struct WindowId {
-  raw : Int
+  raw : Int32
 } derive(Eq, @debug.Debug)
-pub fn WindowId::from_raw(Int) -> Self
-pub fn WindowId::raw(Self) -> Int
+pub fn WindowId::equal(Self, Self) -> Bool
+pub fn WindowId::from_raw(Int32) -> Self
+pub fn WindowId::not_equal(Self, Self) -> Bool
+pub fn WindowId::raw(Self) -> Int32
+pub fn WindowId::to_repr(Self) -> @debug.Repr
 
 pub(all) struct WindowOptions {
   title : String
@@ -220,7 +274,10 @@ pub(all) struct WindowOptions {
   visible : Bool
   resizable : Bool
 } derive(Eq, @debug.Debug)
+pub fn WindowOptions::equal(Self, Self) -> Bool
 pub fn WindowOptions::new(title? : String, size? : Size, visible? : Bool, resizable? : Bool) -> Self
+pub fn WindowOptions::not_equal(Self, Self) -> Bool
+pub fn WindowOptions::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

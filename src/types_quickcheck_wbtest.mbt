@@ -1,5 +1,5 @@
 ///|
-fn normalize_dimension_for_test(value : Int) -> Int {
+fn normalize_dimension_for_test(value : Int32) -> Int32 {
   if value < 1 {
     1
   } else {
@@ -8,12 +8,12 @@ fn normalize_dimension_for_test(value : Int) -> Int {
 }
 
 ///|
-fn positive_scale_for_test(seed : Int) -> Double {
+fn positive_scale_for_test(seed : Int32) -> Double {
   ((seed & 15) + 1).to_double() / 4.0
 }
 
 ///|
-fn adversarial_double_for_test(tag : Int, value : Int) -> Double {
+fn adversarial_double_for_test(tag : Int32, value : Int32) -> Double {
   match tag & 3 {
     0 => value.to_double()
     1 => (0.0 : Double) / 0.0
@@ -30,7 +30,7 @@ fn positive_finite_for_test(value : Double) -> Bool {
 ///|
 test "quickcheck: sizes normalize arbitrary dimensions" {
   @quickcheck.check(
-    (input : (Int, Int)) => {
+    (input : (Int32, Int32)) => {
       let (width, height) = input
       let size = Size::new(width~, height~)
       size.width >= 1 &&
@@ -49,7 +49,7 @@ test "quickcheck: sizes normalize arbitrary dimensions" {
 ///|
 test "quickcheck: logical sizes normalize finite and non-finite values" {
   @quickcheck.check(
-    (input : (Int, Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32, Int32)) => {
       let (width_tag, width_seed, height_tag, height_seed) = input
       let width = adversarial_double_for_test(width_tag, width_seed)
       let height = adversarial_double_for_test(height_tag, height_seed)
@@ -84,7 +84,7 @@ test "quickcheck: logical sizes normalize finite and non-finite values" {
 ///|
 test "quickcheck: scale-factor validation covers adversarial values" {
   @quickcheck.check(
-    (input : (Int, Int)) => {
+    (input : (Int32, Int32)) => {
       let (tag, value) = input
       let scale_factor = adversarial_double_for_test(tag, value)
       validate_scale_factor(scale_factor) ==
@@ -100,7 +100,7 @@ test "quickcheck: scale-factor validation covers adversarial values" {
 ///|
 test "quickcheck: unit-scale geometry is reversible" {
   @quickcheck.check(
-    (input : (Int, Int)) => {
+    (input : (Int32, Int32)) => {
       let (width, height) = input
       let size = Size::new(width~, height~)
       let logical = size.to_logical(1.0)
@@ -120,7 +120,7 @@ test "quickcheck: unit-scale geometry is reversible" {
 /// particular rounded pixel result.
 test "quickcheck: physical geometry is monotone" {
   @quickcheck.check(
-    (input : (Int, Int, Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32, Int32, Int32)) => {
       let (base_width, width_delta, base_height, height_delta, scale_seed) = input
       let low_width = ((base_width & 1023) + 1).to_double()
       let low_height = ((base_height & 1023) + 1).to_double()
@@ -144,7 +144,7 @@ test "quickcheck: physical geometry is monotone" {
 ///|
 test "quickcheck: monitor IDs accept exactly non-negative indexes" {
   @quickcheck.check(
-    (index : Int) => {
+    (index : Int32) => {
       match MonitorId::from_index(index) {
         None => index < 0
         Some(id) => index >= 0 && id.index() == index
@@ -160,7 +160,7 @@ test "quickcheck: monitor IDs accept exactly non-negative indexes" {
 ///|
 test "quickcheck: monitors preserve identity and normalize bounds" {
   @quickcheck.check(
-    (input : (Int, Int, Int, Int, Int, Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32)) => {
       let (id_seed, x, y, width, height, work_width, work_height, scale_seed) = input
       match MonitorId::from_index(id_seed & 1023) {
         None => false

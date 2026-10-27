@@ -4,7 +4,7 @@ struct KeyFlagApp {
 }
 
 ///|
-pub impl App for KeyFlagApp with fn window_event(self, _active, _id, event) {
+impl App for KeyFlagApp with fn window_event(self, _active, _id, event) {
   self.key_event = Some(event)
 }
 
@@ -21,9 +21,9 @@ fn key_flag_test_active() -> ActiveApp {
 ///|
 test "quickcheck: key event flags decode independently" {
   @quickcheck.check(
-    (input : (Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32)) => {
       let (code, flags, raw_id) = input
-      let app : KeyFlagApp = { key_event: None }
+      let app : KeyFlagApp = { key_event: None, }
       dispatch_event(
         app,
         key_flag_test_active(),

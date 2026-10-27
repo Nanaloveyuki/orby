@@ -4,7 +4,7 @@ struct InputApp {
 }
 
 ///|
-pub impl App for InputApp with fn window_event(self, _active, _id, event) {
+impl App for InputApp with fn window_event(self, _active, _id, event) {
   self.event = Some(event)
 }
 
@@ -20,7 +20,7 @@ fn test_active() -> ActiveApp {
 
 ///|
 test "input events decode native flags" {
-  let app = { event: None }
+  let app = { event: None, }
   let active = test_active()
   dispatch_event(app, active, 7, 1, 65, 16 | 1 | 2 | 32, 0.0, 0.0)
   match app.event {

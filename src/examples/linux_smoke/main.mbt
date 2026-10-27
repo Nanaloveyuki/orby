@@ -118,7 +118,7 @@ fn main raise {
       }
     None => ()
   }
-  let app = { window: None, control_flow_switched: false }
+  let app = { window: None, control_flow_switched: false, }
   let code = event_loop.run_app(app)
   if code != 23 {
     abort("Orby GTK smoke failed with exit code \{code}")

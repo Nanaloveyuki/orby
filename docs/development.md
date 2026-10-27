@@ -15,8 +15,24 @@
 
 ## Local Setup
 
-Install MoonBit for the host platform. Windows native tests and smoke commands
-also require a compatible WebView2 SDK because MoonView is a module dependency:
+Use MoonBit compiler `0.10.17+d971670cd` with CLI `0.1.20261023`.
+`.moonbit-toolchain` selects the exact installer archive; `.moon-version`
+records the CLI version. Install the pinned archive on Unix with:
+
+```sh
+curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- "$(cat .moonbit-toolchain)"
+```
+
+On Windows:
+
+```powershell
+$env:MOONBIT_INSTALL_VERSION = (Get-Content .moonbit-toolchain -Raw).Trim()
+irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+```
+
+Confirm both versions with `moon version --all`, then run `moon update`.
+Do not pass the CLI version to the installer. Windows native tests and smoke
+commands also require a compatible WebView2 SDK because MoonView is a module dependency:
 
 ```powershell
 $env:MOONVIEW_WEBVIEW2_SDK_DIR = "F:\path\to\Microsoft.Web.WebView2"

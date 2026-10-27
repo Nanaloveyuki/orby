@@ -9,6 +9,9 @@ pub struct EventLoopProxy {
 } derive(Debug)
 
 ///|
+pub extend EventLoopProxy with Debug::{to_repr}
+
+///|
 /// A rejected event-loop proxy submission.
 pub(all) enum ProxyError {
   Closed
@@ -17,18 +20,24 @@ pub(all) enum ProxyError {
 } derive(Eq, Debug)
 
 ///|
+pub extend ProxyError with Eq::{equal, not_equal}
+
+///|
+pub extend ProxyError with Debug::{to_repr}
+
+///|
 /// Returns a sender that can be moved to a worker thread.
 ///
 /// Only byte messages cross the thread boundary. Their handlers still run on
 /// Orby's UI thread through App::proxy_message.
 pub fn EventLoop::proxy(self : EventLoop) -> EventLoopProxy {
-  { backend: self.backend, generation: self.proxy_generation }
+  { backend: self.backend, generation: self.proxy_generation, }
 }
 
 ///|
 /// Returns a sender associated with this running application.
 pub fn ActiveApp::proxy(self : ActiveApp) -> EventLoopProxy {
-  { backend: self.backend, generation: self.proxy_generation }
+  { backend: self.backend, generation: self.proxy_generation, }
 }
 
 ///|
@@ -55,7 +64,7 @@ pub fn EventLoopProxy::post(
 }
 
 ///|
-fn proxy_post_result(status : Int) -> Result[Unit, ProxyError] {
+fn proxy_post_result(status : Int32) -> Result[Unit, ProxyError] {
   match status {
     1 => Ok(())
     2 => Err(MessageTooLarge)
@@ -66,7 +75,7 @@ fn proxy_post_result(status : Int) -> Result[Unit, ProxyError] {
 
 ///|
 fn take_proxy_message(backend : NativeBackend) -> Bytes? {
-  let length : Ref[Int] = Ref(-1)
+  let length : Ref[Int32] = Ref(-1)
   let message = native_take_proxy_message(backend, length)
   if length.val < 0 {
     None

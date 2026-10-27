@@ -22,9 +22,24 @@ jobs:
       - name: Install MoonBit
         shell: powershell
         run: |
+          $env:MOONBIT_INSTALL_VERSION = (Get-Content .moonbit-toolchain -Raw).Trim()
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
           irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
           "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Verify pinned MoonBit toolchain
+        shell: powershell
+        run: |
+          $versions = moon version --all
+          $versions
+          $compiler = (Get-Content .moonbit-toolchain -Raw).Trim()
+          $cli = (Get-Content .moon-version -Raw).Trim()
+          if (-not ($versions | Select-String -SimpleMatch "moonc v$compiler (")) {
+            throw "MoonBit compiler $compiler is required"
+          }
+          if (-not ($versions | Select-String -SimpleMatch "moon $cli (")) {
+            throw "MoonBit CLI $cli is required"
+          }
 
       - name: Download WebView2 SDK
         shell: powershell
@@ -87,8 +102,14 @@ jobs:
       - name: Install MoonBit
         shell: bash
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- "$(cat .moonbit-toolchain)"
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Verify pinned MoonBit toolchain
+        run: |
+          moon version --all
+          moon version --all | grep -F "moonc v$(cat .moonbit-toolchain) ("
+          moon version --all | grep -F "moon $(cat .moon-version) ("
 
       - name: Update Mooncakes registry
         run: moon update

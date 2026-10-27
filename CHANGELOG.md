@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Pin the compiler archive to `0.10.17+d971670cd` and CLI to `0.1.20261023`,
+  including exact-version installation in Linux and Windows CI.
+- Preserve derived and implemented trait methods as explicit public methods
+  for MoonBit 0.10.17; keep dispatch-test callback implementations test-local.
+
 ## 0.1.0-beta.6
 
 - Pin the project to MoonBit 0.10.9.

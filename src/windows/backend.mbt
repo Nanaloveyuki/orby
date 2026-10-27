@@ -11,11 +11,11 @@ pub fn is_active() -> Bool {
 ///|
 pub fn create_window(
   title : Bytes,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
   visible : Bool,
   resizable : Bool,
-  id : Int,
+  id : Int32,
 ) -> UInt64 {
   native_create_window(title, width, height, visible, resizable, id)
 }
@@ -81,7 +81,7 @@ pub fn set_fullscreen(handle : UInt64, fullscreen : Bool) -> Unit {
 }
 
 ///|
-pub fn set_fullscreen_on(handle : UInt64, monitor : Int) -> Bool {
+pub fn set_fullscreen_on(handle : UInt64, monitor : Int32) -> Bool {
   native_set_fullscreen_on(handle, monitor)
 }
 
@@ -91,27 +91,35 @@ pub fn is_fullscreen(handle : UInt64) -> Bool {
 }
 
 ///|
-pub fn set_min_inner_size(handle : UInt64, width : Int, height : Int) -> Unit {
+pub fn set_min_inner_size(
+  handle : UInt64,
+  width : Int32,
+  height : Int32,
+) -> Unit {
   native_set_min_inner_size(handle, width, height)
 }
 
 ///|
-pub fn set_max_inner_size(handle : UInt64, width : Int, height : Int) -> Unit {
+pub fn set_max_inner_size(
+  handle : UInt64,
+  width : Int32,
+  height : Int32,
+) -> Unit {
   native_set_max_inner_size(handle, width, height)
 }
 
 ///|
-pub fn set_inner_size(handle : UInt64, width : Int, height : Int) -> Unit {
+pub fn set_inner_size(handle : UInt64, width : Int32, height : Int32) -> Unit {
   native_set_inner_size(handle, width, height)
 }
 
 ///|
-pub fn inner_width(handle : UInt64) -> Int {
+pub fn inner_width(handle : UInt64) -> Int32 {
   native_inner_width(handle)
 }
 
 ///|
-pub fn inner_height(handle : UInt64) -> Int {
+pub fn inner_height(handle : UInt64) -> Int32 {
   native_inner_height(handle)
 }
 
@@ -121,7 +129,7 @@ pub fn scale_factor(handle : UInt64) -> Double {
 }
 
 ///|
-pub fn set_outer_position(handle : UInt64, x : Int, y : Int) -> Unit {
+pub fn set_outer_position(handle : UInt64, x : Int32, y : Int32) -> Unit {
   native_set_outer_position(handle, x, y)
 }
 
@@ -131,7 +139,7 @@ pub fn request_close(handle : UInt64) -> Unit {
 }
 
 ///|
-pub fn exit(code : Int) -> Unit {
+pub fn exit(code : Int32) -> Unit {
   native_exit(code)
 }
 
@@ -141,33 +149,33 @@ pub fn set_control_flow(poll : Bool) -> Unit {
 }
 
 ///|
-pub fn monitor_count() -> Int {
+pub fn monitor_count() -> Int32 {
   native_monitor_count()
 }
 
 ///|
-pub fn monitor_metric(index : Int, metric : Int) -> Int {
+pub fn monitor_metric(index : Int32, metric : Int32) -> Int32 {
   native_monitor_metric(index, metric)
 }
 
 ///|
-pub fn monitor_scale(index : Int) -> Double {
+pub fn monitor_scale(index : Int32) -> Double {
   native_monitor_scale(index)
 }
 
 ///|
-pub fn primary_monitor_index() -> Int {
+pub fn primary_monitor_index() -> Int32 {
   native_primary_monitor_index()
 }
 
 ///|
-pub fn current_monitor_index(handle : UInt64) -> Int {
+pub fn current_monitor_index(handle : UInt64) -> Int32 {
   native_current_monitor_index(handle)
 }
 
 ///|
 pub fn set_event_callback(
-  callback : (Int, Int, Int, Int, Double, Double) -> Unit,
+  callback : (Int32, Int32, Int32, Int32, Double, Double) -> Unit,
 ) -> Unit {
   native_set_event_callback(
     fn(callback, kind, id, arg0, arg1, argd0, argd1) {
@@ -183,7 +191,7 @@ pub fn open_proxy() -> UInt64 {
 }
 
 ///|
-pub fn post_proxy_message(generation : UInt64, message : Bytes) -> Int {
+pub fn post_proxy_message(generation : UInt64, message : Bytes) -> Int32 {
   native_post_proxy_message(generation, message)
 }
 
@@ -193,22 +201,22 @@ pub fn proxy_is_open(generation : UInt64) -> Bool {
 }
 
 ///|
-pub fn take_proxy_message(length : Ref[Int]) -> Bytes {
+pub fn take_proxy_message(length : Ref[Int32]) -> Bytes {
   native_take_proxy_message(length)
 }
 
 ///|
-pub fn run() -> Int {
+pub fn run() -> Int32 {
   native_run()
 }
 
 ///|
-pub fn poll(timeout? : Int) -> Int {
+pub fn poll(timeout? : Int32) -> Int32 {
   native_poll(timeout.unwrap_or(-1))
 }
 
 ///|
-pub fn finish() -> Int {
+pub fn finish() -> Int32 {
   native_finish()
 }
 

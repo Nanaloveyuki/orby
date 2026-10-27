@@ -135,7 +135,7 @@ fn main raise {
     None => abort("Orby Win32 smoke expected a primary monitor")
   }
   println("orby windows smoke: running")
-  let app = { window: None, control_flow_switched: false }
+  let app = { window: None, control_flow_switched: false, }
   let code = event_loop.run_app(app)
   println("orby windows smoke: exited \{code}")
   if code != 23 {

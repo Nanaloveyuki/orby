@@ -5,6 +5,9 @@ pub struct WebViewHost {
 } derive(Debug)
 
 ///|
+pub extend WebViewHost with Debug::{to_repr}
+
+///|
 pub fn WebViewHost::native_handle(
   self : WebViewHost,
 ) -> UInt64 raise WindowError {
@@ -23,9 +26,15 @@ pub struct Window {
 } derive(Debug)
 
 ///|
+pub extend Window with Debug::{to_repr}
+
+///|
 pub impl Eq for Window with fn equal(self, other) {
   self.id_ == other.id_
 }
+
+///|
+pub extend Window with Eq::{equal, not_equal}
 
 ///|
 pub fn Window::id(self : Window) -> WindowId {
@@ -42,7 +51,7 @@ pub fn Window::webview_host(self : Window) -> WebViewHost raise WindowError {
   if !self.alive.val {
     raise WindowError::Destroyed
   }
-  { handle: self.handle, alive: self.alive }
+  { handle: self.handle, alive: self.alive, }
 }
 
 ///|

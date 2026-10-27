@@ -1,6 +1,6 @@
 ///|
 struct ProxySmoke {
-  mut delivered : Int
+  mut delivered : Int32
   mut exiting_called : Bool
 }
 
@@ -38,7 +38,7 @@ pub impl @orby.App for ProxySmoke with fn exiting(self, _app) {
 ///|
 fn main raise {
   let event_loop = @orby.EventLoop::new()
-  let app = { delivered: 0, exiting_called: false }
+  let app = { delivered: 0, exiting_called: false, }
   let code = event_loop.run_app(app)
   if code != 0 || app.delivered != 2 || !app.exiting_called {
     abort("orby proxy smoke failed")
@@ -55,7 +55,7 @@ fn main raise {
   if !proxy.is_closed() {
     abort("a prior proxy must not attach to a later event loop")
   }
-  let next_app = { delivered: 0, exiting_called: false }
+  let next_app = { delivered: 0, exiting_called: false, }
   let next_code = next_event_loop.run_app(next_app)
   if next_code != 0 || next_app.delivered != 2 || !next_app.exiting_called {
     abort("second proxy smoke loop failed")

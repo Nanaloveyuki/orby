@@ -26,11 +26,11 @@ fn native_event_loop_is_active() -> Bool {
 fn native_create_window(
   backend : NativeBackend,
   title : Bytes,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
   visible : Bool,
   resizable : Bool,
-  id : Int,
+  id : Int32,
 ) -> UInt64 {
   match backend {
     Windows =>
@@ -167,7 +167,7 @@ fn native_set_fullscreen(
 fn native_set_fullscreen_on(
   backend : NativeBackend,
   handle : UInt64,
-  monitor : Int,
+  monitor : Int32,
 ) -> Bool {
   match backend {
     Windows => @windows.set_fullscreen_on(handle, monitor)
@@ -187,8 +187,8 @@ fn native_is_fullscreen(backend : NativeBackend, handle : UInt64) -> Bool {
 fn native_set_min_inner_size(
   backend : NativeBackend,
   handle : UInt64,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   match backend {
     Windows => @windows.set_min_inner_size(handle, width, height)
@@ -200,8 +200,8 @@ fn native_set_min_inner_size(
 fn native_set_max_inner_size(
   backend : NativeBackend,
   handle : UInt64,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   match backend {
     Windows => @windows.set_max_inner_size(handle, width, height)
@@ -213,8 +213,8 @@ fn native_set_max_inner_size(
 fn native_set_inner_size(
   backend : NativeBackend,
   handle : UInt64,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   match backend {
     Windows => @windows.set_inner_size(handle, width, height)
@@ -223,7 +223,7 @@ fn native_set_inner_size(
 }
 
 ///|
-fn native_inner_width(backend : NativeBackend, handle : UInt64) -> Int {
+fn native_inner_width(backend : NativeBackend, handle : UInt64) -> Int32 {
   match backend {
     Windows => @windows.inner_width(handle)
     Linux => @linux.inner_width(handle)
@@ -231,7 +231,7 @@ fn native_inner_width(backend : NativeBackend, handle : UInt64) -> Int {
 }
 
 ///|
-fn native_inner_height(backend : NativeBackend, handle : UInt64) -> Int {
+fn native_inner_height(backend : NativeBackend, handle : UInt64) -> Int32 {
   match backend {
     Windows => @windows.inner_height(handle)
     Linux => @linux.inner_height(handle)
@@ -250,8 +250,8 @@ fn native_scale_factor(backend : NativeBackend, handle : UInt64) -> Double {
 fn native_set_outer_position(
   backend : NativeBackend,
   handle : UInt64,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Unit {
   match backend {
     Windows => @windows.set_outer_position(handle, x, y)
@@ -268,7 +268,7 @@ fn native_request_close(backend : NativeBackend, handle : UInt64) -> Unit {
 }
 
 ///|
-fn native_exit(backend : NativeBackend, code : Int) -> Unit {
+fn native_exit(backend : NativeBackend, code : Int32) -> Unit {
   match backend {
     Windows => @windows.exit(code)
     Linux => @linux.exit(code)
@@ -284,7 +284,7 @@ fn native_set_control_flow(backend : NativeBackend, poll : Bool) -> Unit {
 }
 
 ///|
-fn native_monitor_count(backend : NativeBackend) -> Int {
+fn native_monitor_count(backend : NativeBackend) -> Int32 {
   match backend {
     Windows => @windows.monitor_count()
     Linux => @linux.monitor_count()
@@ -294,9 +294,9 @@ fn native_monitor_count(backend : NativeBackend) -> Int {
 ///|
 fn native_monitor_metric(
   backend : NativeBackend,
-  index : Int,
-  metric : Int,
-) -> Int {
+  index : Int32,
+  metric : Int32,
+) -> Int32 {
   match backend {
     Windows => @windows.monitor_metric(index, metric)
     Linux => @linux.monitor_metric(index, metric)
@@ -304,7 +304,7 @@ fn native_monitor_metric(
 }
 
 ///|
-fn native_monitor_scale(backend : NativeBackend, index : Int) -> Double {
+fn native_monitor_scale(backend : NativeBackend, index : Int32) -> Double {
   match backend {
     Windows => @windows.monitor_scale(index)
     Linux => @linux.monitor_scale(index)
@@ -312,7 +312,7 @@ fn native_monitor_scale(backend : NativeBackend, index : Int) -> Double {
 }
 
 ///|
-fn native_primary_monitor_index(backend : NativeBackend) -> Int {
+fn native_primary_monitor_index(backend : NativeBackend) -> Int32 {
   match backend {
     Windows => @windows.primary_monitor_index()
     Linux => @linux.primary_monitor_index()
@@ -323,7 +323,7 @@ fn native_primary_monitor_index(backend : NativeBackend) -> Int {
 fn native_current_monitor_index(
   backend : NativeBackend,
   handle : UInt64,
-) -> Int {
+) -> Int32 {
   match backend {
     Windows => @windows.current_monitor_index(handle)
     Linux => @linux.current_monitor_index(handle)
@@ -333,7 +333,7 @@ fn native_current_monitor_index(
 ///|
 fn native_set_event_callback(
   backend : NativeBackend,
-  callback : (Int, Int, Int, Int, Double, Double) -> Unit,
+  callback : (Int32, Int32, Int32, Int32, Double, Double) -> Unit,
 ) -> Unit {
   match backend {
     Windows => @windows.set_event_callback(callback)
@@ -354,7 +354,7 @@ fn native_post_proxy_message(
   backend : NativeBackend,
   generation : UInt64,
   message : Bytes,
-) -> Int {
+) -> Int32 {
   match backend {
     Windows => @windows.post_proxy_message(generation, message)
     Linux => @linux.post_proxy_message(generation, message)
@@ -372,7 +372,7 @@ fn native_proxy_is_open(backend : NativeBackend, generation : UInt64) -> Bool {
 ///|
 fn native_take_proxy_message(
   backend : NativeBackend,
-  length : Ref[Int],
+  length : Ref[Int32],
 ) -> Bytes {
   match backend {
     Windows => @windows.take_proxy_message(length)
@@ -381,7 +381,7 @@ fn native_take_proxy_message(
 }
 
 ///|
-fn native_run(backend : NativeBackend) -> Int {
+fn native_run(backend : NativeBackend) -> Int32 {
   match backend {
     Windows => @windows.run()
     Linux => @linux.run()
@@ -389,7 +389,7 @@ fn native_run(backend : NativeBackend) -> Int {
 }
 
 ///|
-fn native_poll(backend : NativeBackend, timeout? : Int) -> Int {
+fn native_poll(backend : NativeBackend, timeout? : Int32) -> Int32 {
   match backend {
     Windows => @windows.poll(timeout?)
     Linux => @linux.poll(timeout?)
@@ -397,7 +397,7 @@ fn native_poll(backend : NativeBackend, timeout? : Int) -> Int {
 }
 
 ///|
-fn native_finish(backend : NativeBackend) -> Int {
+fn native_finish(backend : NativeBackend) -> Int32 {
   match backend {
     Windows => @windows.finish()
     Linux => @linux.finish()

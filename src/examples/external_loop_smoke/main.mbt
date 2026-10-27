@@ -22,7 +22,7 @@ fn main raise {
   } noraise {
     _ => abort("orby external loop: concurrent EventLoop was accepted")
   }
-  let app = { exiting_called: false }
+  let app = { exiting_called: false, }
   let external = event_loop.start_external_app(app)
   let code = match external.poll(timeout=0) {
     @orby.ExternalPoll::Continue =>
@@ -33,7 +33,7 @@ fn main raise {
     abort("orby external loop: terminal result was not preserved")
   }
   let next_event_loop = @orby.EventLoop::new()
-  let next_app = { exiting_called: false }
+  let next_app = { exiting_called: false, }
   let next_external = next_event_loop.start_external_app(next_app)
   let next_code = match next_external.poll(timeout=0) {
     @orby.ExternalPoll::Continue =>
