@@ -65,7 +65,7 @@ fn main raise {
 
 ## Status
 
-The `0.1.0-beta.0` pre-release targets a small application lifecycle, native
+The `0.1.0-beta.7` pre-release targets a small application lifecycle, native
 windows, resize/DPI/focus/redraw events, and WebView-ready host containers.
 MoonView integration is validated on both supported platforms in CI. Public API
 changes remain possible before the stable 0.1.0 release.
