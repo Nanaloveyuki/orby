@@ -15,7 +15,7 @@
 
 ## Local Setup
 
-Use MoonBit compiler `0.10.17+d971670cd` with CLI `0.1.20261023`.
+Use MoonBit compiler `0.10.19+97801ee1b` with CLI `0.1.20261029`.
 `.moonbit-toolchain` selects the exact installer archive; `.moon-version`
 records the CLI version. Install the pinned archive on Unix with:
 
@@ -40,6 +40,9 @@ $env:MOONVIEW_WEBVIEW2_SDK_DIR = "F:\path\to\Microsoft.Web.WebView2"
 
 The CI workflow downloads the supported SDK version automatically. On Linux,
 install GTK3, WebKitGTK 4.1, `pkg-config`, and `xvfb` before native validation.
+Debian and Ubuntu packages are `build-essential`, `nodejs`, `libgtk-3-dev`,
+`libwebkit2gtk-4.1-dev`, `pkg-config`, `xvfb`, and `xauth`. WSLg supplies a
+display, so its native smoke commands do not require Xvfb.
 
 ## Validation
 
@@ -65,6 +68,14 @@ xvfb-run --auto-servernum sh scripts/run-moonview-linux-smoke.sh
 
 The Linux scripts are required because GTK3 link flags are not usable through
 MoonBit's `tcc -run` debug path.
+
+With an active WSLg display, run the compiled native smoke scripts directly
+from the repository root:
+
+```sh
+sh scripts/run-linux-smoke.sh
+sh scripts/run-moonview-linux-smoke.sh
+```
 
 ## Change Workflow
 

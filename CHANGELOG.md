@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-beta.8
+
+- Pin the compiler archive to `0.10.19+97801ee1b` and CLI to `0.1.20261029`
+  for local development and Linux and Windows CI.
+- Update the desktop WebView integration to MoonView `0.1.0-beta.13` and
+  the parser dependency to `Nanaloveyuki/parsec@0.1.6`.
+
 ## 0.1.0-beta.7
 
 - Pin the compiler archive to `0.10.17+d971670cd` and CLI to `0.1.20261023`,
