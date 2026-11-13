@@ -1,8 +1,9 @@
 ///|
+#derive(Debug)
 pub struct WebViewHost {
   priv handle : UInt64
   priv alive : Ref[Bool]
-} derive(Debug)
+}
 
 ///|
 pub extend WebViewHost with Debug::{to_repr}
@@ -18,12 +19,13 @@ pub fn WebViewHost::native_handle(
 }
 
 ///|
+#derive(Debug)
 pub struct Window {
   priv id_ : WindowId
   priv handle : UInt64
   priv alive : Ref[Bool]
   priv backend : NativeBackend
-} derive(Debug)
+}
 
 ///|
 pub extend Window with Debug::{to_repr}

@@ -34,23 +34,25 @@ impl App with fn exiting(_self, _app) {
 }
 
 ///|
+#derive(Debug)
 pub struct EventLoop {
   priv backend : NativeBackend
   priv proxy_generation : UInt64
   priv next_window_id : Ref[Int32]
   priv runtime_failure : Ref[String?]
-} derive(Debug)
+}
 
 ///|
 pub extend EventLoop with Debug::{to_repr}
 
 ///|
+#derive(Debug)
 pub struct ActiveApp {
   priv backend : NativeBackend
   priv proxy_generation : UInt64
   priv next_window_id : Ref[Int32]
   priv runtime_failure : Ref[String?]
-} derive(Debug)
+}
 
 ///|
 pub extend ActiveApp with Debug::{to_repr}

@@ -1,9 +1,10 @@
 ///|
 /// Physical client-area size in native pixels.
+#derive(Eq, Debug)
 pub(all) struct Size {
   width : Int32
   height : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Size with Eq::{equal, not_equal}
@@ -35,10 +36,11 @@ pub fn validate_scale_factor(scale_factor : Double) -> Bool {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct LogicalSize {
   width : Double
   height : Double
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend LogicalSize with Eq::{equal, not_equal}
@@ -93,10 +95,11 @@ pub fn Size::to_logical(
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Position {
   x : Int32
   y : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Position with Eq::{equal, not_equal}
@@ -110,9 +113,10 @@ pub fn Position::new(x~ : Int32, y~ : Int32) -> Position {
 }
 
 ///|
+#derive(Eq, Debug)
 pub struct MonitorId {
   priv index_ : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend MonitorId with Eq::{equal, not_equal}
@@ -135,6 +139,7 @@ pub fn MonitorId::index(self : MonitorId) -> Int32 {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Monitor {
   id : MonitorId
   x : Int32
@@ -146,7 +151,7 @@ pub(all) struct Monitor {
   work_width : Int32
   work_height : Int32
   scale_factor : Double
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Monitor with Eq::{equal, not_equal}
@@ -202,9 +207,10 @@ pub fn Monitor::new(
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct WindowId {
   raw : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend WindowId with Eq::{equal, not_equal}
@@ -223,10 +229,11 @@ pub fn WindowId::raw(self : WindowId) -> Int32 {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum ControlFlow {
   Poll
   Wait
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend ControlFlow with Eq::{equal, not_equal}
@@ -235,10 +242,11 @@ pub extend ControlFlow with Eq::{equal, not_equal}
 pub extend ControlFlow with Debug::{to_repr}
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum InputState {
   Pressed
   Released
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend InputState with Eq::{equal, not_equal}
@@ -247,12 +255,13 @@ pub extend InputState with Eq::{equal, not_equal}
 pub extend InputState with Debug::{to_repr}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Modifiers {
   shift : Bool
   control : Bool
   alt : Bool
   meta : Bool
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Modifiers with Eq::{equal, not_equal}
@@ -271,12 +280,13 @@ pub fn Modifiers::new(
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct NativeKeyEvent {
   code : Int32
   state : InputState
   repeat : Bool
   modifiers : Modifiers
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend NativeKeyEvent with Eq::{equal, not_equal}
@@ -295,6 +305,7 @@ pub fn NativeKeyEvent::new(
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum MouseButton {
   Left
   Right
@@ -302,7 +313,7 @@ pub(all) enum MouseButton {
   Back
   Forward
   Other(Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend MouseButton with Eq::{equal, not_equal}
@@ -311,10 +322,11 @@ pub extend MouseButton with Eq::{equal, not_equal}
 pub extend MouseButton with Debug::{to_repr}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct ScrollDelta {
   x : Double
   y : Double
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend ScrollDelta with Eq::{equal, not_equal}
@@ -328,6 +340,7 @@ pub fn ScrollDelta::new(x~ : Double, y~ : Double) -> ScrollDelta {
 }
 
 ///|
+#derive(Debug)
 pub(all) enum WindowEvent {
   CloseRequested
   Destroyed
@@ -342,18 +355,19 @@ pub(all) enum WindowEvent {
   PointerLeft
   MouseInput(MouseButton, InputState, Modifiers)
   MouseWheel(ScrollDelta, Modifiers)
-} derive(Debug)
+}
 
 ///|
 pub extend WindowEvent with Debug::{to_repr}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct WindowOptions {
   title : String
   size : Size
   visible : Bool
   resizable : Bool
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend WindowOptions with Eq::{equal, not_equal}
@@ -372,30 +386,33 @@ pub fn WindowOptions::new(
 }
 
 ///|
+#derive(Debug)
 pub(all) suberror GeometryError {
   InvalidScaleFactor(Double)
-} derive(Debug)
+}
 
 ///|
 pub extend GeometryError with Debug::{to_repr}
 
 ///|
+#derive(Debug)
 pub(all) suberror InitError {
   /// Another EventLoop has already initialized Orby's process-global host.
   AlreadyActive
   UnsupportedHost(String)
   PlatformFailure(String)
-} derive(Debug)
+}
 
 ///|
 pub extend InitError with Debug::{to_repr}
 
 ///|
 /// Result of one external event-loop pump.
+#derive(Eq, Debug)
 pub(all) enum ExternalPoll {
   Continue
   Exited(Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend ExternalPoll with Eq::{equal, not_equal}
@@ -404,20 +421,22 @@ pub extend ExternalPoll with Eq::{equal, not_equal}
 pub extend ExternalPoll with Debug::{to_repr}
 
 ///|
+#derive(Debug)
 pub(all) suberror WindowError {
   CreationFailed(String)
   MonitorUnavailable(MonitorId)
   Destroyed
-} derive(Debug)
+}
 
 ///|
 pub extend WindowError with Debug::{to_repr}
 
 ///|
+#derive(Debug)
 pub(all) suberror AppError {
   StartupFailed(String)
   RuntimeFailed(String)
-} derive(Debug)
+}
 
 ///|
 pub extend AppError with Debug::{to_repr}

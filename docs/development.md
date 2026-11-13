@@ -15,7 +15,7 @@
 
 ## Local Setup
 
-Use MoonBit compiler `0.10.19+97801ee1b` with CLI `0.1.20261029`.
+Use MoonBit compiler `0.10.20+65efd5b93` with CLI `0.1.20261104`.
 `.moonbit-toolchain` selects the exact installer archive; `.moon-version`
 records the CLI version. Install the pinned archive on Unix with:
 

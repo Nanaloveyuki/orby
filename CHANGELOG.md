@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-beta.9
+
+- Pin compiler archive `0.10.20+65efd5b93` and CLI `0.1.20261104` for development and Linux/Windows CI.
+- Migrate trait derivations to `#derive` while retaining the public windowing API.
+- Update published dependencies to MoonView `0.1.0-beta.14` and parser `0.1.7`.
+
 ## 0.1.0-beta.8
 
 - Pin the compiler archive to `0.10.19+97801ee1b` and CLI to `0.1.20261029`

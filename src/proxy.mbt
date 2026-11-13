@@ -3,21 +3,23 @@
 ///
 /// The native queue copies every message, so callers may release the source
 /// bytes immediately. It accepts at most 1 MiB per message and 8 MiB in total.
+#derive(Debug)
 pub struct EventLoopProxy {
   priv backend : NativeBackend
   priv generation : UInt64
-} derive(Debug)
+}
 
 ///|
 pub extend EventLoopProxy with Debug::{to_repr}
 
 ///|
 /// A rejected event-loop proxy submission.
+#derive(Eq, Debug)
 pub(all) enum ProxyError {
   Closed
   MessageTooLarge
   QueueFull
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend ProxyError with Eq::{equal, not_equal}

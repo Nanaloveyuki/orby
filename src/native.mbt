@@ -1,8 +1,9 @@
 ///|
+#derive(Debug)
 priv enum NativeBackend {
   Windows
   Linux
-} derive(Debug)
+}
 
 ///|
 fn initialize_backend() -> NativeBackend raise InitError {
