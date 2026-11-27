@@ -210,7 +210,7 @@ pub fn EventLoop::primary_monitor(self : EventLoop) -> Monitor? {
 ///
 /// Call `poll` repeatedly from the embedding event loop, then call `terminate`
 /// exactly once after the embedding runtime has stopped. This is intended for
-/// integrations such as `moonbitlang/async`'s external event loop support.
+/// integrations such as `moonbitlang/core/async`'s external event loop support.
 pub fn[A : App] EventLoop::start_external_app(
   self : EventLoop,
   app : A,

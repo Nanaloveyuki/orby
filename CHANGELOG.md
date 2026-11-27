@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0-beta.1
+
+- Pin MoonBit compiler archive `1.0.0-rc1+3c0520448` and CLI `0.1.20261126`.
+- Use MoonView 0.2.0 and Parsec 0.2.0 for the desktop host.
+
 ## 0.1.0-beta.9
 
 - Pin compiler archive `0.10.20+65efd5b93` and CLI `0.1.20261104` for development and Linux/Windows CI.
